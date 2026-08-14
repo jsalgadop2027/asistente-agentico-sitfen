@@ -1,0 +1,135 @@
+{"resumen": "Detecté pulgones en gran cantidad sobre las hojas nuevas de mi campo, ¿qué debo hacer?", "expected_entidades": ["senasa"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "¿Cuánto tiempo demora el trámite del certificado fitosanitario para exportar a Corea del Sur?", "expected_entidades": ["senasa"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero saber si mi finca cumple los requisitos para ser zona libre de Ceratitis capitata.", "expected_entidades": ["senasa"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Qué fungicidas están permitidos para el control de botrytis en arándano de exportación?", "expected_entidades": ["senasa"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Un técnico me dijo que mi campo podría tener una enfermedad cuarentenaria, ¿cómo confirmo el diagnóstico?", "expected_entidades": ["senasa"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "¿Cómo renuevo mi registro como exportador de fruta fresca?", "expected_entidades": ["senasa"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito el protocolo fitosanitario actualizado para exportar arándano a Japón.", "expected_entidades": ["senasa"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Puedo usar un producto genérico en vez de la marca que indica la etiqueta para el control de moscas?", "expected_entidades": ["senasa"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Cómo reporto la presencia de una plaga nueva que no había visto antes en la zona?", "expected_entidades": ["senasa"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "¿Cuánto va a subir la temperatura del mar frente a Chiclayo este trimestre?", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Estoy preocupado porque las lluvias de esta semana no paran y temo que se intensifiquen.", "expected_entidades": ["senamhi"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "¿Hay un pronóstico oficial de heladas para la sierra de La Libertad la próxima semana?", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿SENAMHI ya emitió el boletín climático de este mes?", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero entender qué significa que ENFEN diga que El Niño está en fase moderada.", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cuál es la temperatura promedio esperada para la campaña que viene?", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito el registro histórico de lluvias de mi provincia para un estudio.", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Hasta cuándo se espera que dure esta temporada de lluvias fuertes?", "expected_entidades": ["senamhi"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Cómo me suscribo a las alertas tempranas de SENAMHI por WhatsApp o correo?", "expected_entidades": ["senamhi"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "El agua ya entró a mi vivienda y no sé cómo sacar a mi familia, ¿qué hago?", "expected_entidades": ["indeci"], "expected_urgencia": "critica", "case_type": "single"}
+{"resumen": "Se cayó un puente cerca de mi fundo por las lluvias, ¿a quién reporto esto?", "expected_entidades": ["indeci"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "Perdí toda mi cosecha de este año por la inundación, necesito ayuda urgente.", "expected_entidades": ["indeci"], "expected_urgencia": "critica", "case_type": "single"}
+{"resumen": "¿Dónde queda el centro de acopio de ayuda humanitaria más cercano a mi distrito?", "expected_entidades": ["indeci"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Escuché una alarma de emergencia, ¿qué debo hacer ahora mismo?", "expected_entidades": ["indeci"], "expected_urgencia": "critica", "case_type": "single"}
+{"resumen": "¿Cómo me inscribo como voluntario para brigadas de respuesta ante desastres?", "expected_entidades": ["indeci"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Mi vecino quedó atrapado por el desborde del río, necesito ayuda inmediata.", "expected_entidades": ["indeci"], "expected_urgencia": "critica", "case_type": "single"}
+{"resumen": "¿Existe algún fondo de INDECI para reponer bienes perdidos en un desastre?", "expected_entidades": ["indeci"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Quiero saber el protocolo si el huaico corta la única vía de acceso a mi comunidad.", "expected_entidades": ["indeci"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Hay algún bono para pequeños productores este año?", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Perdí varias plantas por el calor y quiero saber si hay ayuda para comprar plantones nuevos.", "expected_entidades": ["midagri"], "expected_urgencia": "alta", "case_type": "single"}
+{"resumen": "¿Cómo me registro en el padrón de productores de MIDAGRI?", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito saber si hay líneas de crédito agrario con tasa preferencial este semestre.", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Agro Rural tiene programas de semillas certificadas para arándano?", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero información sobre el seguro agrario catastrófico.", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Hay algún fondo de contingencia para productores afectados por el clima?", "expected_entidades": ["midagri"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Necesito actualizar mis datos en el censo agropecuario nacional.", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo solicito asistencia técnica de Agro Rural para mi asociación de productores?", "expected_entidades": ["midagri"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero saber por qué mi fruta está saliendo con menos grados Brix que el año pasado.", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Necesito un análisis de laboratorio para verificar residuos de plaguicidas antes de embarcar.", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Ofrecen capacitación en riego tecnificado para pequeños productores?", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Busco ayuda para diseñar una línea de procesamiento de arándano deshidratado.", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo agendo una visita técnica para revisar el manejo poscosecha de mi packing?", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito mejorar el calibre de mi fruta, ¿tienen asesoría en nutrición vegetal?", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿El CITE certifica la calidad de la fruta antes de una negociación comercial?", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero capacitación en manejo integrado de plagas para mi personal de campo.", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Tienen planta piloto para probar un nuevo empaque que reduzca mermas?", "expected_entidades": ["cite_chavimochic"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Hay un CITE especializado en uva de mesa además del de Chavimochic?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero innovar con un nuevo producto derivado del arándano, ¿con quién del ITP hablo?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿La red de CITEs tiene algún fondo de innovación al que pueda postular?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito contacto con un CITE pesquero para asesorar a un familiar.", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Existen talleres de digitalización de procesos para agroindustria organizados por RedCITE?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero saber si hay un CITE que apoye innovación en textiles de algodón.", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo me conecto con otro CITE si el de Chavimochic no cubre lo que necesito?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Busco mentoría para un emprendimiento agroindustrial nuevo, fuera del rubro arándano.", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿El ITP tiene un directorio de todos los CITEs del país?", "expected_entidades": ["redcite"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero encontrar compradores de arándano orgánico en Corea del Sur.", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cuándo es la próxima feria internacional de agroexportación en la que participa Perú?", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito un estudio de mercado sobre la demanda de mango peruano en Europa.", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿PROMPERÚ tiene programas para exportadores que recién empiezan?", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero saber qué mercados asiáticos tienen mayor crecimiento para uva peruana.", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito contactos de importadores interesados en espárrago fresco.", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo registro mi empresa en el directorio de exportadores?", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Hay alguna misión comercial programada para el próximo trimestre?", "expected_entidades": ["promperu"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito asesoría para fijar el precio FOB de mi primer contenedor de exportación.", "expected_entidades": ["promperu"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Qué régimen tributario me conviene si recién voy a exportar por primera vez?", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Me llegó una notificación de una multa tributaria que no entiendo.", "expected_entidades": ["sunat"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Cómo tramito el drawback de mi última exportación?", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito saber qué documentos aduaneros pide el régimen de exportación definitiva.", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo obtengo mi RUC para formalizar mi negocio agrícola?", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Mi contenedor fue observado en aduana, ¿qué debo hacer?", "expected_entidades": ["sunat"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿Qué beneficios tributarios existen todavía para la actividad agraria?", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito el cronograma de vencimientos tributarios de este año.", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo tramito la devolución del IGV como exportador?", "expected_entidades": ["sunat"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "El canal de regadío de mi valle lleva semanas dañado y nadie lo repara.", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Quiero proponer un proyecto de defensa ribereña para mi zona antes de que lleguen las lluvias fuertes.", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿El gobierno regional tiene un plan de contingencia frente al Niño para mi provincia?", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito el contacto de la gerencia regional de agricultura.", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo participo en el presupuesto participativo de mi región?", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Quiero saber si hay presupuesto regional aprobado para defensas ribereñas este año.", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿A quién reclamo por el mal estado de la trocha hacia mi fundo?", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Necesito apoyo del gobierno regional para un proyecto de riego de mi asociación.", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Quién coordina el dragado del río antes de la temporada de lluvias en mi región?", "expected_entidades": ["gobierno_regional"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "El desagüe de mi calle se tapa cada vez que llueve fuerte.", "expected_entidades": ["municipalidad"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Necesito una licencia municipal para ampliar mi almacén de insumos.", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Cómo reporto un terreno abandonado que acumula basura cerca de mi parcela?", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Mi municipalidad tiene un plan de limpieza de acequias antes de las lluvias?", "expected_entidades": ["municipalidad"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "Necesito el certificado de zonificación de mi terreno.", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "¿Dónde tramito la licencia de funcionamiento para mi tienda de insumos agrícolas?", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Un poste de luz caído bloquea el camino a mi fundo, ¿a quién reporto esto?", "expected_entidades": ["municipalidad"], "expected_urgencia": "media", "case_type": "single"}
+{"resumen": "¿La municipalidad tiene algún programa de arborización en zonas rurales?", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Necesito el horario de atención de la oficina de defensa civil de mi distrito.", "expected_entidades": ["municipalidad"], "expected_urgencia": "baja", "case_type": "single"}
+{"resumen": "Encontré una plaga en mi campo y además el canal de riego de la zona está roto, no sé a quién acudir primero.", "expected_entidades": ["senasa", "gobierno_regional"], "expected_urgencia": "alta", "case_type": "multi"}
+{"resumen": "Quiero exportar mi arándano por primera vez: necesito el certificado fitosanitario y también entender qué impuestos voy a pagar.", "expected_entidades": ["senasa", "sunat"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Busco financiamiento para mi próxima cosecha y también quiero saber si hay compradores en Europa.", "expected_entidades": ["midagri", "promperu"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "El río está creciendo cerca de mi parcela y temo perder la cosecha, además no sé si el seguro agrario cubre esto.", "expected_entidades": ["indeci", "midagri"], "expected_urgencia": "alta", "case_type": "multi"}
+{"resumen": "Quiero mejorar la calidad de mi fruta con apoyo técnico y también saber qué mercados nuevos hay para exportarla.", "expected_entidades": ["cite_chavimochic", "promperu"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Necesito un análisis de laboratorio de mi fruta y también el certificado fitosanitario antes de embarcar.", "expected_entidades": ["cite_chavimochic", "senasa"], "expected_urgencia": "media", "case_type": "multi"}
+{"resumen": "El canal de mi valle está dañado por las lluvias y temo que si sigue así se pierda la próxima siembra.", "expected_entidades": ["gobierno_regional", "senamhi"], "expected_urgencia": "alta", "case_type": "multi"}
+{"resumen": "Quiero saber si hay algún CITE especializado en otro cultivo, y de paso si MIDAGRI tiene subsidios para diversificar mi producción.", "expected_entidades": ["redcite", "midagri"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "¿Cómo tramito mi RUC de exportador y también dónde consigo el certificado de planta de empaque?", "expected_entidades": ["sunat", "senasa"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Mi vivienda y mi almacén de insumos quedaron con daños por la lluvia, necesito ayuda humanitaria y también saber si hay apoyo agrario para reponer lo perdido.", "expected_entidades": ["indeci", "midagri"], "expected_urgencia": "critica", "case_type": "multi"}
+{"resumen": "¿SENAMHI tiene un pronóstico confiable y el gobierno regional ya activó algún plan ante eso?", "expected_entidades": ["senamhi", "gobierno_regional"], "expected_urgencia": "media", "case_type": "multi"}
+{"resumen": "Quiero capacitación técnica del CITE y también participar en una feria de PROMPERÚ este año.", "expected_entidades": ["cite_chavimochic", "promperu"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Necesito saber los aranceles para exportar a Europa y también qué ferias hay este semestre.", "expected_entidades": ["sunat", "promperu"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "El desagüe de mi calle colapsó con la lluvia y temo que también afecte el canal de riego regional.", "expected_entidades": ["municipalidad", "gobierno_regional"], "expected_urgencia": "alta", "case_type": "multi"}
+{"resumen": "¿Cómo reporto una plaga nueva y a la vez consigo apoyo técnico para tratarla?", "expected_entidades": ["senasa", "cite_chavimochic"], "expected_urgencia": "media", "case_type": "multi"}
+{"resumen": "Quiero un crédito agrario para reponer plantones y también saber si el gobierno regional tiene fondos de emergencia agraria.", "expected_entidades": ["midagri", "gobierno_regional"], "expected_urgencia": "media", "case_type": "multi"}
+{"resumen": "Necesito el protocolo fitosanitario para exportar a la India y también entender el trámite de drawback.", "expected_entidades": ["senasa", "sunat"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Tengo un cultivo de palta, no arándano, ¿hay un CITE que me apoye y también una feria de PROMPERÚ para palta?", "expected_entidades": ["redcite", "promperu"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Mi cosecha se perdió casi por completo por las lluvias, necesito ayuda de emergencia y también saber si hay algún programa de MIDAGRI para reponerla.", "expected_entidades": ["indeci", "midagri"], "expected_urgencia": "critica", "case_type": "multi"}
+{"resumen": "¿Cómo consigo el certificado de lugar de producción con SENASA y a la vez mi RUC de exportador con SUNAT?", "expected_entidades": ["senasa", "sunat"], "expected_urgencia": "baja", "case_type": "multi"}
+{"resumen": "Las lluvias ya pudrieron buena parte de mis plantas, temo perder toda la campaña, ¿hay ayuda para esto?", "expected_entidades": ["midagri", "indeci", "senamhi"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "El calor extremo ya está quemando las hojas de mi cultivo, necesito ayuda técnica urgente.", "expected_entidades": ["cite_chavimochic", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "Con la humedad de estas lluvias está avanzando un hongo agresivo en mi campo.", "expected_entidades": ["senasa", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "El canal de mi valle se desbordó con la lluvia y ya inundó parte de mi parcela.", "expected_entidades": ["gobierno_regional", "indeci"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "El agua ya entró a mi almacén de insumos por el desagüe colapsado con esta lluvia.", "expected_entidades": ["municipalidad", "indeci"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "El frío intenso de esta semana ya dañó varias de mis plantas jóvenes.", "expected_entidades": ["midagri", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "La plaga que tenía controlada se disparó con este calor y ya está afectando varias parcelas vecinas.", "expected_entidades": ["senasa", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "El huaico de la semana pasada dañó parte de mi sistema de riego tecnificado y no sé cómo repararlo a tiempo.", "expected_entidades": ["cite_chavimochic", "indeci"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "Temo que el río siga creciendo y dañe la trocha que conecta mi fundo con la carretera.", "expected_entidades": ["gobierno_regional", "indeci", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "Perdí casi toda mi cosecha por el huaico de esta semana, necesito ayuda para volver a sembrar.", "expected_entidades": ["midagri", "indeci"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "Con la inundación de mi zona están apareciendo plagas nuevas que nunca había visto.", "expected_entidades": ["senasa", "indeci"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "El calor extremo ya secó por completo dos hectáreas de mi cultivo.", "expected_entidades": ["cite_chavimochic", "senamhi"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "Las lluvias están saturando el drenaje de mi calle y temo que se inunde esta noche.", "expected_entidades": ["municipalidad", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "El desborde del río ya se llevó parte de mi terreno cultivado esta madrugada.", "expected_entidades": ["gobierno_regional", "indeci"], "expected_urgencia": "critica", "case_type": "escalation"}
+{"resumen": "Las heladas de esta semana ya dañaron buena parte de mis plantones nuevos.", "expected_entidades": ["midagri", "senamhi"], "expected_urgencia": "alta", "case_type": "escalation"}
+{"resumen": "¿Cuál es la capital de Francia?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "Hola, ¿cómo estás?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "¿Qué hora es en Lima ahora mismo?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "Quiero saber más sobre inteligencia artificial en general.", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "¿Cuál es el mejor equipo de fútbol del Perú?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "Necesito ayuda con un problema de mi computadora personal.", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "¿Qué opinas sobre la situación política actual del país?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "¿Puedes recomendarme una película para ver este fin de semana?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "¿Cómo preparo un postre con arándanos para mi familia?", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}
+{"resumen": "Gracias por la información, que tengas un buen día.", "expected_entidades": [], "expected_urgencia": "baja", "case_type": "no_match"}

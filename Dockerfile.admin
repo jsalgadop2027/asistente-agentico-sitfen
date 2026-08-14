@@ -1,0 +1,28 @@
+# Imagen del Admin UI (Streamlit) para carga de contenidos, en Cloud Run.
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PORT=8080
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libjpeg62-turbo libpng16-16 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.lock .
+RUN pip install --upgrade pip && pip install -r requirements.lock
+
+COPY app ./app
+COPY ingestion ./ingestion
+COPY admin_ui ./admin_ui
+
+RUN useradd -m appuser
+USER appuser
+
+EXPOSE 8080
+
+CMD exec streamlit run admin_ui/app.py \
+    --server.port=${PORT} --server.address=0.0.0.0 \
+    --server.headless=true --browser.gatherUsageStats=false

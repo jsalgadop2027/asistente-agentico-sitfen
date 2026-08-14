@@ -1,0 +1,8 @@
+# Dependencias de evaluación de calidad (RAGAS + DeepEval).
+# Deliberadamente separadas de requirements.txt: NO se instalan en las
+# imágenes Docker de producción (webhook/job/admin). Se usan solo para
+# `python -m evaluation.ragas_eval` / `evaluation.deepeval_eval` en local o CI.
+# Instalar sobre la base ya instalada: pip install -r requirements-eval.txt
+# (usa requirements.lock como constraint para no romper versiones pinneadas).
+ragas>=0.2.6
+deepeval>=1.5.0

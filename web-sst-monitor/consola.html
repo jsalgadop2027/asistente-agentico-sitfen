@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>" />
+<title>🛰️ SST Satelital · Norte de Perú</title>
+<style>
+  :root { --azul:#00629f; --azul2:#2e74b5; --bg:#ffffff; --card:#ffffff; --txt:#1a1c1e;
+          --line:#d7dde3; --muted:#5b6670; --uva:#7c3aad; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; color:var(--txt);
+         background:var(--bg); min-height:100vh; }
+  header { text-align:center; padding:14px 14px 6px; }
+  header h1 { margin:0; font-size:1.2rem; color:var(--azul); }
+  header small { color:var(--muted); }
+  .wrap { max-width:1040px; margin:0 auto; padding:8px 14px 28px;
+          display:grid; grid-template-columns:minmax(320px,1fr) 340px; gap:16px; align-items:start; }
+  @media (max-width:860px){ .wrap{ grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:16px;
+           padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.08); }
+
+  /* --- Mapa + barra de calor (leyenda propia) encajada a la derecha --- */
+  #mapWrap { display:flex; gap:8px; }
+  #map { position:relative; flex:1; aspect-ratio:5 / 6.4; border-radius:12px;
+         overflow:hidden; background:#eef2f7; border:1px solid var(--line);
+         cursor:grab; }
+  #map.grabbing { cursor:grabbing; }
+  #pan { position:absolute; inset:0; }   /* se traslada al arrastrar */
+  #map .layer { position:absolute; inset:0; width:100%; height:100%;
+         object-fit:fill; user-select:none; pointer-events:none; }
+  #frame { transition:opacity .12s linear; }
+
+  /* Capa de límites departamentales (SVG reproyectado por viewBox). */
+  #depSvg path.dep { vector-effect:non-scaling-stroke; }
+  /* Vista GEOGRÁFICA: base satelital + solo bordes departamentales. */
+  #map.geo #depSvg { filter:drop-shadow(0 0 1px rgba(0,0,0,.9)); }
+  #map.geo #depSvg path.dep { fill:none; stroke:#ffffff; stroke-width:1; stroke-opacity:.9; }
+  /* Vista POLÍTICA: océano plano + departamentos rellenos de color + bordes. */
+  #map.pol { background:#a9d3e8; }
+  #map.pol #base { display:none; }
+  #map.pol #depSvg path.dep { fill-opacity:.82; stroke:rgba(0,0,0,.55); stroke-width:1; }
+
+  /* Barra de calor propia: paleta y rango se fijan por JS según la capa activa
+     (réplica exacta del colormap de GIBS). Sin título, angosta y a full altura. */
+  #legendCol { flex:0 0 auto; display:flex; gap:4px; padding:2px 0; }
+  .cbar { width:14px; height:100%; border-radius:3px; border:1px solid var(--line); }
+  .cticks { position:relative; width:26px; height:100%; }
+  .cticks span { position:absolute; left:0; transform:translateY(-50%);
+          font-size:.58rem; color:var(--txt); white-space:nowrap; }
+  .cticks span::before { content:""; position:absolute; left:-5px; top:50%;
+          width:3px; height:1px; background:var(--muted); }
+
+  /* Controles superpuestos sobre el mapa */
+  #zoomCtl { position:absolute; top:8px; right:8px; z-index:6;
+          display:flex; flex-direction:column; gap:4px; align-items:center; }
+  #zoomCtl button { width:32px; height:32px; border:none; border-radius:8px;
+          background:rgba(20,34,60,.85); color:#fff; font-size:1.25rem; font-weight:700;
+          cursor:pointer; line-height:1; box-shadow:0 1px 3px rgba(0,0,0,.4); }
+  #zoomCtl #zoomReset { font-size:1rem; }
+  #zoomCtl button:disabled { opacity:.4; cursor:default; }
+  #zoomPct { min-width:38px; text-align:center; padding:2px 4px; border-radius:6px;
+          background:rgba(20,34,60,.85); color:#fff; font-size:.68rem; font-weight:600;
+          box-shadow:0 1px 3px rgba(0,0,0,.4); }
+  #scaleBar { position:absolute; left:10px; bottom:10px; z-index:6; text-align:center; }
+  #scaleBar .lbl { display:block; font-size:.64rem; font-weight:600; color:#fff;
+          text-shadow:0 0 3px #000,0 0 3px #000; margin-bottom:2px; }
+  #scaleBar .sbar { height:7px; border:2px solid #fff; border-top:none;
+          box-shadow:0 0 2px rgba(0,0,0,.9); }
+  #spinner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+          gap:10px; color:#e8eef7; font-size:.85rem; background:rgba(10,18,32,.55); z-index:7; }
+  #spinner .spin { width:16px; height:16px; border:2px solid #44699e; border-top-color:#e8eef7;
+          border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* --- Marcadores --- */
+  .marker { position:absolute; transform:translate(-50%,-50%); z-index:4; pointer-events:none; }
+  .marker .dot { width:9px; height:9px; border-radius:50%; background:#fff;
+          border:2px solid #16223a; box-shadow:0 0 0 1px #fff; margin:0 auto; }
+  .marker.zone .area { width:22px; height:22px; border-radius:50%; margin:0 auto;
+          background:rgba(34,197,94,.45); border:2px solid #22c55e;
+          box-shadow:0 0 0 1px rgba(255,255,255,.55); }
+  .marker .lbl { margin-top:2px; font-size:.62rem; color:#fff; white-space:nowrap;
+          text-shadow:0 0 3px #000,0 0 3px #000; text-align:center; }
+  .marker.zone .lbl { color:#d7ffe4; }
+  /* Sedes RedCITE (ITP): rombo ámbar */
+  .marker.cite .flag { width:11px; height:11px; margin:0 auto; background:#f59e0b;
+          border:2px solid #7c2d12; box-shadow:0 0 0 1px rgba(255,255,255,.6);
+          transform:rotate(45deg); }
+  .marker.cite .lbl { color:#ffe4b3; }
+  /* Etiquetas de departamento (solo vista política) */
+  .marker.dept { z-index:3; }
+  .marker.dept .dlbl { font-size:.6rem; font-weight:700; text-transform:uppercase;
+          letter-spacing:.02em; color:#14203a; white-space:nowrap; text-align:center;
+          text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff,0 0 5px #fff; }
+  #map.nolabels .lbl { display:none; }
+  #dateBadge { position:absolute; top:8px; left:8px; z-index:6; padding:5px 11px;
+          border-radius:999px; background:rgba(20,34,60,.85); border:1px solid #2c4a78;
+          color:#e8eef7; font-size:.82rem; font-weight:600; }
+
+  /* --- Controles laterales --- */
+  .ctl { margin-bottom:14px; }
+  .ctl h3 { margin:0 0 8px; font-size:.82rem; color:var(--muted); text-transform:uppercase;
+          letter-spacing:.04em; font-weight:700; }
+  .seg { display:flex; gap:6px; }
+  .seg button { flex:1; background:#eef2f7; color:var(--txt); border:1px solid var(--line);
+          border-radius:10px; padding:9px 6px; font-weight:600; cursor:pointer; font-size:.85rem; }
+  .seg button.active { background:var(--azul2); color:#fff; border-color:var(--azul2); }
+  .datarow { display:flex; align-items:center; gap:10px; }
+  #refreshBtn { flex:0 0 auto; width:40px; height:40px; border:none; border-radius:10px;
+          background:var(--azul2); color:#fff; font-size:1.2rem; cursor:pointer; line-height:1; }
+  #refreshBtn.spin { animation:spin .8s linear infinite; }
+  #updatedLbl { font-size:.82rem; font-weight:600; color:var(--txt); }
+  .datarow .sub { font-size:.7rem; color:var(--muted); }
+  .playrow { display:flex; align-items:center; gap:10px; }
+  #play { background:var(--azul2); color:#fff; border:none; border-radius:12px;
+          width:52px; height:44px; font-size:1.2rem; cursor:pointer; }
+  input[type=range]{ width:100%; accent-color:var(--azul2); }
+  .rowlbl { display:flex; justify-content:space-between; font-size:.78rem; color:var(--muted);
+          margin-bottom:3px; }
+  .inlinechk { display:flex; align-items:center; gap:6px; margin-top:10px; font-size:.85rem;
+          cursor:pointer; }
+  .chks { display:flex; flex-wrap:wrap; gap:10px 14px; font-size:.83rem; color:var(--txt); }
+  .chks label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+  .swatch { width:11px; height:11px; border-radius:50%; display:inline-block; vertical-align:-1px; }
+  .note { font-size:.75rem; color:var(--muted); line-height:1.4; margin-top:4px; }
+  .note b { color:var(--azul); }
+    /* ===== Consola WhatsApp (bidireccional, un solo usuario) ===== */
+    .wa-fab{position:fixed;right:18px;bottom:18px;z-index:9999;width:56px;height:56px;border:none;border-radius:50%;
+      background:#25d366;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+    .wa-fab:hover{filter:brightness(1.06)}
+    .wa-panel{position:fixed;right:18px;bottom:18px;z-index:9999;width:360px;max-width:calc(100vw - 24px);
+      height:520px;max-height:calc(100vh - 40px);background:#fff;border-radius:14px;overflow:hidden;
+      display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.35);
+      font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+    .wa-panel[hidden]{display:none}
+    .wa-fab[hidden]{display:none}
+    .wa-head{background:#075e54;color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .wa-title{display:flex;align-items:center;gap:9px;min-width:0}
+    .wa-dot{width:9px;height:9px;border-radius:50%;background:#888;flex:none}
+    .wa-name{font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-linked{font-weight:400;opacity:.85;font-size:.8rem}
+    .wa-sub{font-size:.72rem;opacity:.85}
+    .wa-head-actions{display:flex;align-items:center;gap:8px;flex:none}
+    .wa-toggle{display:flex;align-items:center;gap:4px;font-size:.72rem;cursor:pointer;user-select:none}
+    .wa-x{background:transparent;border:none;color:#fff;font-size:1rem;cursor:pointer}
+    .wa-log{flex:1;overflow-y:auto;padding:12px;background:#e5ddd5;display:flex;flex-direction:column;gap:6px}
+    .wa-msg{display:flex}
+    .wa-msg.out{justify-content:flex-end}
+    .wa-bubble{max-width:80%;padding:7px 10px;border-radius:9px;font-size:.86rem;line-height:1.32;
+      box-shadow:0 1px 1px rgba(0,0,0,.12);word-wrap:break-word;white-space:pre-wrap}
+    .wa-msg.in .wa-bubble{background:#fff;color:#111;border-top-left-radius:2px}
+    .wa-msg.out .wa-bubble{background:#dcf8c6;color:#111;border-top-right-radius:2px}
+    .wa-msg.out.bot .wa-bubble{background:#d3ecff}
+    .wa-input{display:flex;gap:6px;padding:8px;background:#f0f0f0;border-top:1px solid #ddd}
+    .wa-input input{flex:1;border:1px solid #ccc;border-radius:20px;padding:8px 12px;font-size:.88rem;outline:none}
+    .wa-send{border:none;background:#25d366;color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;flex:none}
+    .wa-foot{font-size:.7rem;color:#b00;padding:2px 12px 6px;background:#f0f0f0;min-height:14px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Monitoreo del Fenómeno de "El Niño" (Océano Pacífico)</h1>
+    <small>🛰️ Temperatura satelital del mar — Norte de Perú · Anomalía y SST · NASA GIBS / GHRSST MUR L4</small>
+  </header>
+
+  <div class="wrap">
+    <!-- Columna del mapa -->
+    <div class="panel">
+      <div id="mapWrap">
+        <div id="map">
+          <!-- Capas desplazables (pan con clic izquierdo) -->
+          <div id="pan">
+            <img    id="base"  class="layer" alt="" />
+            <svg    id="depSvg" class="layer" preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"></svg>
+            <canvas id="frame" class="layer" width="600" height="768" style="opacity:.85"></canvas>
+            <img    id="coast" class="layer" alt="" />
+          </div>
+          <div id="zoomCtl">
+            <button id="zoomIn"    title="Acercar">+</button>
+            <button id="zoomReset" title="Restablecer tamaño original">⟲</button>
+            <button id="zoomOut"   title="Alejar">−</button>
+            <div id="zoomPct" title="Zoom respecto al tamaño original">100%</div>
+          </div>
+          <div id="scaleBar"><span class="lbl" id="scaleBarLbl">—</span><div class="sbar"></div></div>
+          <div id="dateBadge">—</div>
+          <div id="spinner"><span class="spin"></span> Cargando fotogramas satelitales…</div>
+        </div>
+        <!-- Barra de calor: paleta/rango por capa (rellenada por JS), sin título -->
+        <div id="legendCol">
+          <div class="cbar" id="cbar"></div>
+          <div class="cticks" id="cticks"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna de controles -->
+    <div class="panel">
+      <div class="ctl datarow">
+        <button id="refreshBtn" title="Actualizar datos ahora">↻</button>
+        <div>
+          <div id="updatedLbl">Datos: —</div>
+          <div class="sub" id="checkedLbl">Comprobado: —</div>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>Vista del mapa</h3>
+        <div class="seg" id="segView">
+          <button data-view="geo" class="active">Geográfico</button>
+          <button data-view="pol">Político</button>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>Capa (dato satelital)</h3>
+        <div class="seg" id="segLayer">
+          <button data-layer="anom" class="active">Anomalía (FEN)</button>
+          <button data-layer="sst">SST absoluta</button>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>Animación</h3>
+        <div class="playrow">
+          <button id="play" title="Reproducir / Pausar (barra espaciadora)">▶</button>
+          <div style="flex:1">
+            <div class="rowlbl"><span id="frameDate">—</span><span id="frameIdx"></span></div>
+            <input id="scrub" type="range" min="0" max="0" value="0" step="1" />
+          </div>
+        </div>
+        <label class="inlinechk"><input type="checkbox" id="chkLoop" checked /> Repetir</label>
+      </div>
+
+      <div class="ctl">
+        <h3>Velocidad</h3>
+        <div class="seg" id="segSpeed">
+          <button data-fps="1.5">Lenta</button>
+          <button data-fps="3" class="active">Normal</button>
+          <button data-fps="6">Rápida</button>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>Opacidad de la capa</h3>
+        <input id="opacity" type="range" min="0.3" max="1" step="0.05" value="0.85" />
+      </div>
+
+      <div class="ctl">
+        <h3>Referencias</h3>
+        <div class="chks">
+          <label><input type="checkbox" id="chkCoast" checked /> Costas</label>
+          <label><input type="checkbox" id="chkCities" checked /> Ciudades</label>
+          <label><input type="checkbox" id="chkDepts" checked /> Departamentos</label>
+          <label><input type="checkbox" id="chkZones" checked />
+            <span class="swatch" style="background:#22c55e"></span> Zonas arándano</label>
+          <label><input type="checkbox" id="chkCite" checked />
+            <span class="swatch" style="background:#f59e0b;border-radius:2px"></span> RedCITE (ITP)</label>
+          <label><input type="checkbox" id="chkLabels" checked /> Etiquetas</label>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <h3>Leyenda / escala</h3>
+        <p class="note">La <b>barra de calor</b> (derecha) refleja el colormap real de GIBS de la
+          <b>capa activa</b>: Anomalía con eje <b>−7 a +7 °C</b> (marcas cada 1°; el producto satura
+          en ±3, por eso fuera de esa franja el color queda plano); SST absoluta = <b>0 a 32 °C</b>.
+          <b>Escala geográfica</b> (abajo-izq.) en km. Zoom: <b>+ / −</b>, <b>Ctrl + rueda</b> o
+          <b>⟲</b> para volver al original. Arrastra con el <b>clic izquierdo</b> para desplazarte.</p>
+      </div>
+
+      <p class="note">Fuente: <b>NASA GIBS</b> (WMS), producto <b>GHRSST MUR L4</b> (~1 km,
+        diario, ~1–2 días de rezago). Datos públicos, sin API key. <b>Vista del mapa</b>:
+        Geográfico (relieve) o Político (departamentos en color), ambos con los <b>límites y
+        nombres departamentales</b> del Perú (casilla «Departamentos»). Discos verdes = zonas de cultivo de arándano;
+        rombos ámbar = <b>sedes de la Red CITE del ITP</b> detectadas en el norte (CITEpesquero
+        Piura, CITEagroindustrial Lambayeque y CITEagroindustrial Chavimochic). Zoom con <b>+ / −</b> o
+        <b>Ctrl + rueda</b>.</p>
+    </div>
+  </div>
+
+<script>
+// ---------------------------------------------------------------------------
+//  Visor satelital animado de SST (norte de Perú) — 100% autocontenido.
+//  Cada "fotograma" es una imagen WMS GetMap de NASA GIBS para una fecha. Se
+//  precargan como objetos Image (retenidos) y se pintan en <canvas> con drawImage:
+//  el avance es instantáneo y no re-descarga (evita congelamientos).
+//  El bbox es dinámico → zoom + / − re-pide las imágenes a mayor detalle.
+// ---------------------------------------------------------------------------
+const WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
+const W = 600, H = 768;                 // proporción 5:6.4 (lon:lat), sin distorsión
+const RATIO_LAT = H / W;                // latSpan = lonSpan * 1.28
+
+// Vista (centro + amplitud en longitud). El norte de Perú por defecto.
+let cLon = -80.5, cLat = -6.2, lonSpan = 5.0;
+const MIN_SPAN = 1.5, MAX_SPAN = 5.0;   // límites de zoom
+
+// Ventana temporal: N días terminando hace END_OFFSET días (rezago del producto).
+const N_DAYS = 14, END_OFFSET = 2;
+
+const LAYERS = {
+  anom: { id: "GHRSST_L4_MUR_Sea_Surface_Temperature_Anomalies" },
+  sst:  { id: "GHRSST_L4_MUR_Sea_Surface_Temperature" },
+};
+
+// Barra de calor por capa: gradiente y marcas replican EXACTAMENTE el colormap
+// oficial de GIBS (muestreado de los .xml v1.3). Así la barra coincide con los
+// colores reales del satélite. Anomalía = diverente -3..+3 °C (resalta el cambio);
+// SST absoluta = térmica 0..32 °C. (to top → arriba = más cálido.)
+const LEGENDS = {
+  anom: {
+    // Eje -7..+7 °C con marcas cada 1°. El colormap real de GIBS satura en ±3, así
+    // que el gradiente vive en la franja -3..+3 (28.6%..71.4%) y fuera queda plano
+    // (violeta por debajo de -3, rojo oscuro por encima de +3): representación fiel.
+    grad: "linear-gradient(to top," +
+      "rgb(107,0,219) 0%,rgb(107,0,219) 28.6%," +
+      "rgb(150,0,202) 30.7%,rgb(34,100,241) 34.3%,rgb(0,227,255) 37.9%," +
+      "rgb(96,255,158) 41.4%,rgb(177,255,152) 45%,rgb(191,208,182) 48.6%," +
+      "rgb(237,237,152) 52.1%,rgb(255,208,37) 55.7%,rgb(255,145,0) 59.3%," +
+      "rgb(255,33,0) 62.9%,rgb(230,0,103) 66.4%,rgb(154,0,44) 70%," +
+      "rgb(128,0,0) 71.4%,rgb(128,0,0) 100%)",
+    ticks: [["+7°",0],["+6°",7.1],["+5°",14.3],["+4°",21.4],["+3°",28.6],["+2°",35.7],
+            ["+1°",42.9],["0",50],["-1°",57.1],["-2°",64.3],["-3°",71.4],["-4°",78.6],
+            ["-5°",85.7],["-6°",92.9],["-7°",100]],
+  },
+  sst: {
+    grad: "linear-gradient(to top," +
+      "rgb(43,0,26) 0%,rgb(121,6,117) 11.7%,rgb(30,16,77) 24.4%,rgb(33,75,158) 37%," +
+      "rgb(46,163,239) 49.7%,rgb(120,211,0) 62.3%,rgb(255,175,0) 75%,rgb(222,59,0) 87.7%," +
+      "rgb(107,2,0) 100%)",
+    ticks: [["32°",0],["24°",25],["16°",50],["8°",75],["0°",100]],
+  },
+};
+// Opacidad por defecto por capa: la anomalía se muestra casi opaca para resaltar
+// mejor los cambios; la SST absoluta un poco translúcida sobre la batimetría.
+const OPACITY = { anom: 0.95, sst: 0.85 };
+
+// Ciudades principales del norte de Perú (referencia geográfica), norte→sur.
+const CITIES = [
+  { name: "Zarumilla",  lat: -3.50, lon: -80.27 },
+  { name: "Tumbes",     lat: -3.57, lon: -80.46 },
+  { name: "Zorritos",   lat: -3.68, lon: -80.66 },
+  { name: "Talara",     lat: -4.58, lon: -81.27 },
+  { name: "Sullana",    lat: -4.90, lon: -80.69 },
+  { name: "Paita",      lat: -5.09, lon: -81.11 },
+  { name: "Piura",      lat: -5.19, lon: -80.63 },
+  { name: "Jaén",       lat: -5.71, lon: -78.81 },
+  { name: "Ferreñafe",  lat: -6.64, lon: -79.79 },
+  { name: "Lambayeque", lat: -6.70, lon: -79.91 },
+  { name: "Chiclayo",   lat: -6.77, lon: -79.84 },
+  { name: "Pimentel",   lat: -6.84, lon: -79.93 },
+  { name: "Cajamarca",  lat: -7.16, lon: -78.51 },
+  { name: "Chepén",     lat: -7.22, lon: -79.42 },
+  { name: "Pacasmayo",  lat: -7.40, lon: -79.57 },
+  { name: "Trujillo",   lat: -8.11, lon: -79.03 },
+  { name: "Salaverry",  lat: -8.22, lon: -78.98 },
+  { name: "Chimbote",   lat: -9.08, lon: -78.59 },
+];
+
+// Zonas exactas de cultivo de arándano en el norte (valles productores).
+const ZONES = [
+  { name: "Valle del Chira (Piura)",    lat: -4.93, lon: -80.70 },
+  { name: "Olmos–Motupe (Lambayeque)",  lat: -6.05, lon: -79.74 },
+  { name: "Jayanca–Íllimo (Lamb.)",     lat: -6.42, lon: -79.85 },
+  { name: "Virú–Chao (La Libertad)",    lat: -8.42, lon: -78.75 },
+  { name: "Santa–Nepeña (Áncash)",      lat: -8.98, lon: -78.60 },
+];
+
+// Sedes de la Red CITE del ITP detectadas en el norte (a nivel de sede/ciudad, según
+// el directorio del ITP): CITEpesquero Piura, U.T. agroindustrial de Jayanca y
+// CITEagroindustrial Chavimochic (Virú).
+const CITE_ITP = [
+  { name: "CITEpesquero Piura",            lat: -5.19, lon: -80.63 },
+  { name: "CITEagroindustrial Lambayeque", lat: -6.39, lon: -79.82 },
+  { name: "CITEagroindustrial Chavimochic", lat: -8.41, lon: -78.75 },
+];
+
+const $ = id => document.getElementById(id);
+const elMap = $("map"), elPan = $("pan"), elBase = $("base"), elCoast = $("coast"),
+      elSpinner = $("spinner"), elBadge = $("dateBadge"),
+      elPlay = $("play"), elScrub = $("scrub"),
+      elFrameDate = $("frameDate"), elFrameIdx = $("frameIdx"), elOpacity = $("opacity"),
+      elScaleBar = $("scaleBar"), elScaleLbl = $("scaleBarLbl"),
+      elZoomIn = $("zoomIn"), elZoomOut = $("zoomOut"),
+      elZoomReset = $("zoomReset"), elZoomPct = $("zoomPct");
+const DEF_CLON = -80.5, DEF_CLAT = -6.2;   // vista original (100% zoom)
+const cv = $("frame"), ctx = cv.getContext("2d");
+const elCbar = $("cbar"), elCticks = $("cticks"), elDepSvg = $("depSvg");
+const elRefresh = $("refreshBtn"), elUpdated = $("updatedLbl"), elChecked = $("checkedLbl");
+
+// Región máxima permitida para el centro al hacer zoom (evita irse del norte).
+const REGION = { minLon:-84, maxLon:-77.5, minLat:-10.4, maxLat:-2.6 };
+
+// --- Barra de calor por capa -----------------------------------------------
+function setLegend(key){
+  const L = LEGENDS[key];
+  elCbar.style.background = L.grad;
+  elCticks.innerHTML = L.ticks.map(([v, p]) => `<span style="top:${p}%">${v}</span>`).join("");
+}
+
+// --- Bbox dinámico ---------------------------------------------------------
+function bounds(){
+  const latSpan = lonSpan * RATIO_LAT;
+  return { minLon:cLon - lonSpan/2, maxLon:cLon + lonSpan/2,
+           minLat:cLat - latSpan/2, maxLat:cLat + latSpan/2 };
+}
+function bboxStr(){ const b = bounds(); return `${b.minLon},${b.minLat},${b.maxLon},${b.maxLat}`; }
+
+// --- Utilidades ------------------------------------------------------------
+function fmtISO(d){ return d.toISOString().slice(0, 10); }             // yyyy-mm-dd (UTC)
+function fmtHuman(iso){
+  const [y, m, day] = iso.split("-");
+  const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  return `${day} ${meses[+m - 1]} ${y}`;
+}
+function buildDates(){
+  const out = [];
+  const now = Date.now();
+  for (let k = N_DAYS - 1; k >= 0; k--){
+    out.push(fmtISO(new Date(now - (END_OFFSET + k) * 86400000)));
+  }
+  return out; // ascendente en el tiempo
+}
+function wmsUrl(layerId, transparent, time){
+  const p = new URLSearchParams({
+    SERVICE:"WMS", VERSION:"1.1.1", REQUEST:"GetMap", LAYERS:layerId,
+    SRS:"EPSG:4326", BBOX:bboxStr(), WIDTH:W, HEIGHT:H,
+    FORMAT:"image/png", TRANSPARENT:transparent ? "TRUE" : "FALSE",
+  });
+  if (time) p.set("TIME", time);
+  return `${WMS}?${p.toString()}`;
+}
+
+// --- Estado ----------------------------------------------------------------
+let dates = buildDates();       // ventana de fechas; se rehace al auto-actualizar
+let curLayer = "anom";
+let images = [];         // Image() por fecha (retenidas → sin re-descarga)
+let ready = [];          // ¿fotograma decodificado y no vacío?
+let idx = 0;
+let playing = false;
+let fps = 3;
+let timer = null;
+
+// --- Escala geográfica (barra de km) ---------------------------------------
+function updateScale(){
+  const b = bounds();
+  const kmPerDegLon = 111.32 * Math.cos((b.minLat + b.maxLat) / 2 * Math.PI / 180);
+  const totalKm = (b.maxLon - b.minLon) * kmPerDegLon;
+  const nice = [10, 20, 25, 50, 100, 150, 200, 250, 500];
+  const target = totalKm * 0.22;
+  let km = nice[0];
+  for (const n of nice) if (n <= target) km = n;
+  elScaleBar.style.width = (km / totalKm * 100) + "%";
+  elScaleLbl.textContent = km + " km";
+}
+
+// --- Marcadores (ciudades + zonas de cultivo) ------------------------------
+function project(lat, lon){
+  const b = bounds();
+  return { left:(lon - b.minLon) / (b.maxLon - b.minLon) * 100,
+           top:(b.maxLat - lat) / (b.maxLat - b.minLat) * 100 };
+}
+function addMarker(p, kind){
+  const { left, top } = project(p.lat, p.lon);
+  if (left < 0 || left > 100 || top < 0 || top > 100) return;
+  const el = document.createElement("div");
+  el.className = "marker " + kind;
+  el.style.left = left + "%"; el.style.top = top + "%";
+  if (kind === "dept"){
+    el.innerHTML = `<div class="dlbl">${p.name}</div>`;
+  } else {
+    const glyph = kind === "zone" ? '<div class="area"></div>'
+                : kind === "cite" ? '<div class="flag"></div>'
+                : '<div class="dot"></div>';
+    el.innerHTML = `${glyph}<div class="lbl">${p.name}</div>`;
+  }
+  elPan.appendChild(el);
+}
+function renderMarkers(){
+  document.querySelectorAll(".marker").forEach(m => m.remove());
+  if ($("chkDepts").checked)  DEPTS.forEach(d => addMarker(d, "dept"));   // nombres de depto. (ambas vistas)
+  if ($("chkZones").checked)  ZONES.forEach(z => addMarker(z, "zone"));
+  if ($("chkCite").checked)   CITE_ITP.forEach(c => addMarker(c, "cite"));
+  if ($("chkCities").checked) CITIES.forEach(c => addMarker(c, "city"));
+}
+
+// --- Límites departamentales (vistas Geográfico / Político) ----------------
+// Se dibujan desde map.json (paths ya proyectados en px). La capa SVG se reproyecta
+// al bbox actual solo cambiando su viewBox (proyección afín px = f(lon,lat)), así
+// se alinea con las teselas satelitales y se mueve con el zoom/pan.
+const POLIT_COLORS = ["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#e5d8bd",
+  "#fddaec","#b3e2cd","#fdcdac","#cbd5e8","#f4cae4","#e6f5c9"];
+let MAP = null, DEPTS = [], mapMode = "geo";   // proyección + centroides + vista activa
+function xOfLon(lon){ return MAP.offX + (lon - MAP.lonMin) * MAP.k * MAP.cosLat; }
+function yOfLat(lat){ return MAP.offY + (MAP.latMax - lat) * MAP.k; }
+function lonOfX(px){ return MAP.lonMin + (px - MAP.offX) / (MAP.k * MAP.cosLat); }
+function latOfY(py){ return MAP.latMax - (py - MAP.offY) / MAP.k; }
+function updateDepViewBox(){
+  if (!MAP) return;
+  const b = bounds();
+  const x0 = xOfLon(b.minLon), x1 = xOfLon(b.maxLon);
+  const y0 = yOfLat(b.maxLat), y1 = yOfLat(b.minLat);   // maxLat = arriba
+  elDepSvg.setAttribute("viewBox", `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+}
+function buildDepartments(data){
+  MAP = { lonMin:data.lonMin, latMax:data.latMax, k:data.k, cosLat:data.cosLat,
+          offX:data.offX, offY:data.offY };
+  const NS = "http://www.w3.org/2000/svg";
+  DEPTS = [];
+  (data.departments || []).forEach((d, i) => {
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", d.path);
+    p.setAttribute("class", "dep");
+    p.setAttribute("fill", POLIT_COLORS[i % POLIT_COLORS.length]);
+    elDepSvg.appendChild(p);
+    // Centroide aproximado (centro del bounding box del path, en px) → lon/lat.
+    const bb = p.getBBox();
+    DEPTS.push({ name:d.name, lon:lonOfX(bb.x + bb.width / 2), lat:latOfY(bb.y + bb.height / 2) });
+  });
+  updateDepViewBox();
+  renderMarkers();     // refresca por si ya estamos en vista política
+}
+function setView(mode){
+  mapMode = mode;
+  elMap.classList.toggle("geo", mode === "geo");
+  elMap.classList.toggle("pol", mode === "pol");
+}
+
+// --- Capas base (dependen del bbox) ----------------------------------------
+function applyStatic(){
+  elBase.src  = wmsUrl("BlueMarble_ShadedRelief_Bathymetry", false, null);
+  elCoast.src = wmsUrl("Coastlines_15m", true, null);
+}
+
+// --- Precarga de fotogramas de la capa activa ------------------------------
+function loadLayer(layerKey){
+  curLayer = layerKey;
+  const cfg = LAYERS[layerKey];
+
+  stop();
+  elSpinner.style.display = "flex";
+  images = dates.map(() => null);
+  ready = dates.map(() => false);
+  let settled = 0;
+
+  dates.forEach((d, i) => {
+    const im = new Image();
+    im.onload = () => { ready[i] = im.naturalWidth > 0; if (i === idx) drawFrame(idx); done(); };
+    im.onerror = () => { ready[i] = false; done(); };
+    im.src = wmsUrl(cfg.id, true, d);
+    images[i] = im;                     // retenida: drawImage no re-descarga
+  });
+  function done(){
+    if (++settled === dates.length){
+      elSpinner.style.display = "none";
+      showFrame(dates.length - 1);      // arranca en la fecha más reciente
+      play();                            // anima por defecto, sin esperar al clic en ▶
+    }
+  }
+  elScrub.max = dates.length - 1;
+}
+
+// --- Render de un fotograma ------------------------------------------------
+function drawFrame(i){
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (images[i] && ready[i]) ctx.drawImage(images[i], 0, 0, cv.width, cv.height);
+}
+function showFrame(i){
+  idx = (i + dates.length) % dates.length;
+  drawFrame(idx);
+  elScrub.value = idx;
+  const iso = dates[idx];
+  elBadge.textContent = fmtHuman(iso);
+  elFrameDate.textContent = fmtHuman(iso);
+  elFrameIdx.textContent = `${idx + 1}/${dates.length}`;
+}
+
+// --- Reproducción ----------------------------------------------------------
+function tick(){
+  let next = idx + 1;
+  if (next >= dates.length){
+    if (!$("chkLoop").checked){ stop(); return; }   // sin "Repetir": se detiene al final
+    next = 0;                                        // con "Repetir": vuelve al inicio
+  }
+  showFrame(next);
+}
+function play(){
+  if (!dates.length) return;
+  if (idx >= dates.length - 1 && !$("chkLoop").checked) showFrame(0);
+  playing = true; elPlay.textContent = "⏸";
+  clearInterval(timer);
+  timer = setInterval(tick, 1000 / fps);
+}
+function stop(){
+  playing = false; elPlay.textContent = "▶";
+  clearInterval(timer); timer = null;
+}
+function toggle(){ playing ? stop() : play(); }
+
+// --- Auto-actualización de datos -------------------------------------------
+// El producto MUR de GIBS es diario (~1–2 días de rezago). Rehacemos la ventana
+// de fechas al recuperar el foco/visibilidad y cada 12 h; solo si aparece un día
+// nuevo (o si el usuario pulsa ↻) se vuelven a pedir los fotogramas.
+function updateUpdatedBadge(){
+  elUpdated.textContent = "Datos al " + fmtHuman(dates[dates.length - 1]);
+}
+function setChecked(){   // fecha/hora de la última comprobación, fijada a America/Lima
+  const now = new Date();
+  const fecha = now.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Lima" });
+  const hora = now.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: "America/Lima" });
+  elChecked.textContent = `Comprobado: ${fecha}, ${hora}`;
+}
+function refreshData(force){
+  const fresh = buildDates();
+  const changed = fresh[fresh.length - 1] !== dates[dates.length - 1];
+  setChecked();                  // registra la hora aunque no haya día nuevo
+  if (!changed && !force) return;
+  dates = fresh;
+  updateUpdatedBadge();
+  elRefresh.classList.add("spin");
+  loadLayer(curLayer);            // re-pide los fotogramas con las fechas nuevas
+  setTimeout(() => elRefresh.classList.remove("spin"), 900);
+}
+
+// --- Zoom ------------------------------------------------------------------
+function updateZoomButtons(){
+  elZoomIn.disabled  = lonSpan <= MIN_SPAN + 1e-6;
+  elZoomOut.disabled = lonSpan >= MAX_SPAN - 1e-6;
+  elZoomPct.textContent = Math.round(MAX_SPAN / lonSpan * 100) + "%";   // vs. imagen original
+}
+// Restablece la vista al tamaño/encuadre original (100%).
+function resetView(){
+  cLon = DEF_CLON; cLat = DEF_CLAT; lonSpan = MAX_SPAN;
+  applyView();
+}
+function applyView(){
+  applyStatic();
+  renderMarkers();
+  updateDepViewBox();    // realinea los límites departamentales al nuevo bbox
+  updateScale();
+  updateZoomButtons();
+  loadLayer(curLayer);   // re-pide los fotogramas para el nuevo bbox
+}
+function clampCenter(){
+  const latSpan = lonSpan * RATIO_LAT;
+  cLon = (lonSpan >= REGION.maxLon - REGION.minLon)
+       ? (REGION.minLon + REGION.maxLon) / 2
+       : Math.min(REGION.maxLon - lonSpan/2, Math.max(REGION.minLon + lonSpan/2, cLon));
+  cLat = (latSpan >= REGION.maxLat - REGION.minLat)
+       ? (REGION.minLat + REGION.maxLat) / 2
+       : Math.min(REGION.maxLat - latSpan/2, Math.max(REGION.minLat + latSpan/2, cLat));
+}
+// Zoom manteniendo bajo el cursor el punto geográfico (fx,fy = fracción 0..1 del
+// mapa; por defecto el centro, para los botones). Devuelve true si cambió.
+function zoomBy(factor, fx, fy){
+  fx = (fx == null) ? 0.5 : fx;
+  fy = (fy == null) ? 0.5 : fy;
+  const b = bounds();
+  const gLon = b.minLon + fx * (b.maxLon - b.minLon);
+  const gLat = b.maxLat - fy * (b.maxLat - b.minLat);
+  const ns = Math.min(MAX_SPAN, Math.max(MIN_SPAN, lonSpan * factor));
+  if (Math.abs(ns - lonSpan) < 1e-6) return false;
+  lonSpan = ns;
+  const latSpan = lonSpan * RATIO_LAT;
+  cLon = gLon + lonSpan * (0.5 - fx);
+  cLat = gLat + latSpan * (fy - 0.5);
+  clampCenter();
+  return true;
+}
+// Ctrl + rueda re-pide imágenes; se difiere para agrupar ráfagas de scroll.
+let applyTimer = null;
+function scheduleApply(){
+  updateZoomButtons();
+  clearTimeout(applyTimer);
+  applyTimer = setTimeout(applyView, 180);
+}
+
+// --- Eventos de UI ---------------------------------------------------------
+elPlay.addEventListener("click", toggle);
+elScrub.addEventListener("input", () => { stop(); showFrame(+elScrub.value); });
+elOpacity.addEventListener("input", () => { cv.style.opacity = elOpacity.value; });
+elZoomIn.addEventListener("click", () => { if (zoomBy(0.66)) applyView(); });
+elZoomOut.addEventListener("click", () => { if (zoomBy(1 / 0.66)) applyView(); });
+elZoomReset.addEventListener("click", resetView);
+// Zoom con la rueda del mouse SOLO con Ctrl presionado (hacia el cursor).
+elMap.addEventListener("wheel", e => {
+  if (!e.ctrlKey) return;
+  e.preventDefault();
+  const r = elMap.getBoundingClientRect();
+  const fx = (e.clientX - r.left) / r.width;
+  const fy = (e.clientY - r.top) / r.height;
+  if (zoomBy(e.deltaY < 0 ? 0.9 : 1 / 0.9, fx, fy)) scheduleApply();
+}, { passive: false });
+
+// --- Desplazamiento (pan) con clic izquierdo ------------------------------
+// Vista previa fluida trasladando #pan; al soltar se traslada el centro (en
+// grados) y se re-piden las imágenes. clampCenter mantiene la vista en los márgenes.
+let dragging = false, dragSX = 0, dragSY = 0, dragDX = 0, dragDY = 0;
+elMap.addEventListener("mousedown", e => {
+  if (e.button !== 0 || e.target.closest("#zoomCtl")) return;   // no arrastrar sobre los botones
+  dragging = true; dragSX = e.clientX; dragSY = e.clientY; dragDX = dragDY = 0;
+  elMap.classList.add("grabbing");
+  e.preventDefault();
+});
+window.addEventListener("mousemove", e => {
+  if (!dragging) return;
+  dragDX = e.clientX - dragSX; dragDY = e.clientY - dragSY;
+  elPan.style.transform = `translate(${dragDX}px, ${dragDY}px)`;
+});
+window.addEventListener("mouseup", () => {
+  if (!dragging) return;
+  dragging = false; elMap.classList.remove("grabbing"); elPan.style.transform = "";
+  if (Math.abs(dragDX) < 2 && Math.abs(dragDY) < 2) return;     // fue clic, no arrastre
+  const r = elMap.getBoundingClientRect(), b = bounds();
+  cLon -= dragDX * (b.maxLon - b.minLon) / r.width;             // arrastrar a la derecha → mirar al oeste
+  cLat += dragDY * (b.maxLat - b.minLat) / r.height;
+  clampCenter();
+  applyView();
+});
+
+$("segView").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("segView").querySelectorAll("button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  setView(b.dataset.view);
+  renderMarkers();     // muestra/oculta las etiquetas de departamento
+});
+$("segLayer").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("segLayer").querySelectorAll("button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  const key = b.dataset.layer;
+  setLegend(key);                                   // barra: rango + color por capa
+  cv.style.opacity = OPACITY[key]; elOpacity.value = OPACITY[key];
+  loadLayer(key);
+});
+$("segSpeed").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("segSpeed").querySelectorAll("button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active");
+  fps = +b.dataset.fps;
+  if (playing) play();     // reinicia el intervalo con la nueva velocidad
+});
+$("chkCoast").addEventListener("change", e => elCoast.style.display = e.target.checked ? "" : "none");
+$("chkCities").addEventListener("change", renderMarkers);
+$("chkDepts").addEventListener("change", renderMarkers);
+$("chkZones").addEventListener("change", renderMarkers);
+$("chkCite").addEventListener("change", renderMarkers);
+$("chkLabels").addEventListener("change", e => elMap.classList.toggle("nolabels", !e.target.checked));
+// "Repetir" (chkLoop) se lee en vivo dentro de tick(): no requiere manejador.
+
+// Auto-actualización: al volver a la pestaña y cada 12 h; ↻ fuerza la recarga.
+elRefresh.addEventListener("click", () => refreshData(true));
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshData(false); });
+window.addEventListener("focus", () => refreshData(false));
+setInterval(() => refreshData(false), 12 * 3600 * 1000);
+
+document.addEventListener("keydown", e => {
+  // No robar teclas mientras se escribe en un campo (p. ej. la consola WhatsApp).
+  var t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+  if (e.code === "Space"){ e.preventDefault(); toggle(); }
+  else if (e.code === "ArrowRight"){ stop(); showFrame(idx + 1); }
+  else if (e.code === "ArrowLeft"){ stop(); showFrame(idx - 1); }
+});
+
+// --- Arranque --------------------------------------------------------------
+elMap.classList.toggle("nolabels", !$("chkLabels").checked);
+setView("geo");
+setLegend(curLayer);
+cv.style.opacity = OPACITY[curLayer]; elOpacity.value = OPACITY[curLayer];
+applyView();
+updateUpdatedBadge();
+setChecked();
+// Carga (mismo origen) la geometría de departamentos y la dibuja cuando llegue.
+fetch("/map.json").then(r => r.json()).then(buildDepartments).catch(() => {});
+</script>
+
+  <!-- ===== Consola WhatsApp (bidireccional, un solo usuario) ===== -->
+  <button id="waFab" class="wa-fab" title="Consola WhatsApp" aria-label="Abrir consola WhatsApp">&#128172;</button>
+  <div id="waPanel" class="wa-panel" hidden>
+    <div class="wa-head">
+      <div class="wa-title">
+        <span class="wa-dot" id="waDot"></span>
+        <div style="min-width:0">
+          <div class="wa-name">WhatsApp <span id="waLinked" class="wa-linked"></span></div>
+          <div class="wa-sub" id="waStatus">conectando&#8230;</div>
+        </div>
+      </div>
+      <div class="wa-head-actions">
+        <label class="wa-toggle" title="Pausar el bot y atender t&uacute;"><input type="checkbox" id="waPause"> Atiendo yo</label>
+        <button id="waClose" class="wa-x" aria-label="Cerrar">&#10005;</button>
+      </div>
+    </div>
+    <div id="waLog" class="wa-log"></div>
+    <form id="waForm" class="wa-input">
+      <input id="waText" type="text" autocomplete="off" placeholder="Escribe un mensaje&#8230;" />
+      <button type="submit" class="wa-send" aria-label="Enviar">&#10148;</button>
+    </form>
+    <div class="wa-foot" id="waFoot"></div>
+  </div>
+  <script>
+  (function () {
+    "use strict";
+    var $ = function (id) { return document.getElementById(id); };
+    var TOKEN = new URLSearchParams(location.search).get("token") || "";
+    var since = 0, timer = null, seen = {};
+    var fab = $("waFab"), panel = $("waPanel"), log = $("waLog");
+    fab.onclick = function () { panel.hidden = false; fab.hidden = true; start(); };
+    $("waClose").onclick = function () { panel.hidden = true; fab.hidden = false; stop(); };
+    function esc(t) { var d = document.createElement("div"); d.textContent = t || ""; return d.innerHTML; }
+    function addMsg(m) {
+      if (seen[m.id]) return; seen[m.id] = 1;
+      var out = m.dir === "out";
+      var el = document.createElement("div");
+      el.className = "wa-msg " + (out ? "out" : "in") + (m.kind === "bot" ? " bot" : "");
+      var tag = m.kind === "voice" ? "\uD83C\uDFA4 " : (m.kind === "bot" ? "\uD83E\uDD16 " : "");
+      el.innerHTML = '<div class="wa-bubble">' + tag + esc(m.text) + "</div>";
+      log.appendChild(el); log.scrollTop = log.scrollHeight;
+      if (m.ts_ms && m.ts_ms > since) since = m.ts_ms;
+    }
+    function q(u) { return u + (u.indexOf("?") < 0 ? "?" : "&") + "token=" + encodeURIComponent(TOKEN); }
+    function poll() {
+      fetch(q("/api/live/messages?since=" + since)).then(function (r) {
+        if (r.status === 403) { $("waStatus").textContent = "token inv\u00e1lido"; $("waDot").style.background = "#d33"; stop(); return null; }
+        if (!r.ok) { $("waStatus").textContent = "sin conexi\u00f3n"; $("waDot").style.background = "#e0a800"; return null; }
+        return r.json();
+      }).then(function (d) {
+        if (!d) return;
+        (d.messages || []).forEach(addMsg);
+        $("waLinked").textContent = d.linked ? ("\u00b7 " + d.linked) : "";
+        $("waPause").checked = !!d.paused;
+        $("waStatus").textContent = d.paused ? "t\u00fa atiendes (bot en pausa)" : "bot activo";
+        $("waDot").style.background = "#25d366";
+      }).catch(function () { $("waStatus").textContent = "sin conexi\u00f3n"; $("waDot").style.background = "#e0a800"; });
+    }
+    function start() { poll(); timer = setInterval(poll, 3000); }
+    function stop() { if (timer) clearInterval(timer); timer = null; }
+    $("waForm").onsubmit = function (e) {
+      e.preventDefault();
+      var t = $("waText").value.trim(); if (!t) return;
+      $("waText").value = ""; $("waFoot").textContent = "enviando\u2026";
+      fetch(q("/api/live/send"), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: t }) })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (x) { if (x.ok && x.d.sent) { $("waFoot").textContent = ""; poll(); } else { $("waFoot").textContent = (x.d && x.d.error) || "no se pudo enviar"; } })
+        .catch(function () { $("waFoot").textContent = "error de red"; });
+    };
+    $("waPause").onchange = function () {
+      fetch(q("/api/live/pause"), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ paused: $("waPause").checked }) })
+        .then(function () { poll(); }).catch(function () {});
+    };
+    function sys(msg) {
+      var el = document.createElement("div");
+      el.style.cssText = "text-align:center;font-size:.74rem;color:#5a5a5a;margin:8px 4px;line-height:1.4";
+      el.textContent = msg; log.appendChild(el);
+    }
+    // Consola de un solo usuario: si la URL trae token, abre y conecta sola.
+    if (TOKEN) {
+      panel.hidden = false; fab.hidden = true; start();
+    } else {
+      panel.hidden = false; fab.hidden = true;
+      $("waStatus").textContent = "falta token"; $("waDot").style.background = "#d33";
+      sys("Falta el token en la URL. Abre la consola con el enlace que incluye ?token=<tu-token>.");
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ocean_primary">#006684</color>
+    <color name="ocean_primary_dark">#00131C</color>
+    <color name="ocean_bg">#F6FAFC</color>
+    <color name="ocean_bg_dark">#0B1418</color>
+    <color name="ic_launcher_background">#006684</color>
+</resources>

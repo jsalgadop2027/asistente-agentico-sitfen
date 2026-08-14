@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// Reglas de seguridad de Firestore — Chatbot Agéntico RAG (Arándano).
+//
+// Modelo de acceso: TODO el acceso a Firestore es server-side, desde Cloud Run
+// mediante el Admin SDK (service account). El Admin SDK OMITE estas reglas por
+// diseño. Sirven como DEFENSA EN PROFUNDIDAD: si algún día se usara un SDK cliente
+// (web/móvil) con las credenciales del proyecto, quedaría bloqueado. El avatar web
+// y WhatsApp no tocan Firestore directamente: pasan por la API FastAPI.
+//
+// La colección `users` contiene datos personales (Ley 29733 / GDPR): su acceso
+// directo desde clientes debe estar prohibido; solo el backend puede leerla/escribirla.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Denegar cualquier lectura/escritura desde SDKs cliente para TODAS las
+    // colecciones (corpus_chunks, conversations, kb_events, users, ...).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# Build del Admin UI usando Dockerfile.admin (Cloud Build).
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.admin
+      - -t
+      - ${_IMAGE}
+      - .
+images:
+  - ${_IMAGE}
+substitutions:
+  _IMAGE: "us-central1-docker.pkg.dev/chatbot-agentico-v2/chatbot-repo/arandano-admin:latest"

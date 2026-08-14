@@ -1,0 +1,25 @@
+{
+  "name": "aru-desktop",
+  "version": "1.0.0",
+  "description": "SITFEN — Asistente conversacional de Información Temprana (cliente de escritorio, Electron)",
+  "author": "Ing. Julio Salgado",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "fetch-assets": "powershell -ExecutionPolicy Bypass -File scripts/fetch-assets.ps1",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "pe.utec.aru.desktop",
+    "productName": "SITFEN Desktop",
+    "files": ["main.js", "renderer/**/*"],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage" }
+  }
+}

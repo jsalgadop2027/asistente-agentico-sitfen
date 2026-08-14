@@ -1,0 +1,53 @@
+# ----- Core / orquestación agéntica -----
+langgraph>=0.2.50
+langchain>=0.3.7
+langchain-core>=0.3.20
+langchain-google-vertexai>=2.0.7
+langsmith>=0.1.140
+
+# ----- Google Cloud (Vertex AI, Firestore, Storage, Speech, Secrets) -----
+google-cloud-aiplatform>=1.71.0
+google-cloud-firestore>=2.19.0
+google-cloud-storage>=2.18.0
+google-cloud-speech>=2.27.0
+google-cloud-texttospeech>=2.17.0
+google-cloud-secret-manager>=2.20.0
+
+# ----- API / canal WhatsApp -----
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+gunicorn>=23.0.0
+twilio>=9.3.0
+python-multipart>=0.0.12
+httpx>=0.27.0
+
+# ----- Ingesta / RAG -----
+pypdf>=5.1.0
+pdfplumber>=0.11.4
+python-docx>=1.1.2
+trafilatura>=1.12.0
+tiktoken>=0.8.0
+langdetect>=1.0.9
+rank-bm25>=0.2.2
+
+# ----- Validación de ingesta (antivirus opcional) -----
+# Cliente ClamAV: solo se usa si settings.clamav_host está configurado.
+clamd>=1.0.2
+
+# ----- Configuración / utilidades -----
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+python-dotenv>=1.0.1
+tenacity>=9.0.0
+structlog>=24.4.0
+
+# ----- Admin UI (carga de contenidos) -----
+streamlit>=1.40.0
+altair>=5.0.0
+
+# ----- Gráficos (tool de WhatsApp: SST/precipitación con datos reales) -----
+matplotlib>=3.9.0
+
+# ----- Tests -----
+pytest>=8.3.0
+pytest-asyncio>=0.24.0

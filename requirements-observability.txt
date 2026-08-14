@@ -1,0 +1,20 @@
+# Observabilidad de producción: cliente de tracing de Confident AI (DeepEval).
+#
+# Se instala en la imagen del servicio agéntico SOBRE requirements.lock, usándolo
+# como constraint (-c requirements.lock) para NO mover ninguna versión pinneada
+# del stack core. Si DeepEval exigiera una versión incompatible de una dependencia
+# compartida, el build de Docker falla de forma explícita (no en runtime): la
+# revisión en producción actual sigue intacta hasta que un build correcto sustituya
+# la imagen.
+#
+# Nota: solo la imagen del agente (Dockerfile) lo necesita. El Admin UI
+# (Dockerfile.admin) NO lo instala. Las deps de EVALUACIÓN batch (RAGAS/DeepEval
+# juez) siguen en requirements-eval.txt, aparte de esto.
+#
+# Versión FIJADA (no ">=") por reproducibilidad y supply-chain (OWASP LLM03):
+# esta librería SÍ entra en la imagen de producción, así que una versión flotante
+# podría cambiar de comportamiento sin control de cambios en un build futuro. El
+# job "security" de CI corre pip-audit sobre el entorno resultante de instalar
+# exactamente este archivo (ver .github/workflows/ci.yml). Para actualizar:
+# subir el pin aquí a propósito y validar el build antes de hacer merge.
+deepeval==4.0.7

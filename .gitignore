@@ -1,0 +1,82 @@
+# Secretos y entorno (NUNCA versionar)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+service-account*.json
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Datos / artefactos locales
+data/
+# ...pero el paquete fuente `data` de la app Android sí es código versionado:
+!android-sst-monitor/app/src/main/java/pe/utec/sstmonitor/data/
+*.log
+audio_tmp/
+.deepeval/
+deepeval-cache.json
+
+# Node / Electron (app de escritorio)
+node_modules/
+desktop/node_modules/
+desktop/dist/
+desktop/out/
+desktop/release/
+npm-debug.log*
+
+# Streamlit / IDE
+.streamlit/secrets.toml
+.vscode/
+.idea/
+
+# Claude Code: config/estado local de la máquina (rutas y permisos personales,
+# no aplica a otros colaboradores ni tiene valor versionado)
+.claude/
+
+# GCP
+.gcloudignore
+
+# Corpus fuente y material pesado (no es código; no se modifica en este trabajo)
+corpus_documental/
+desktop/renderer/vendor/
+desktop/renderer/avatar.glb
+
+# Material académico/financiero y entregables — información privada o sensible
+# del autor y del capstone (informes, exposiciones, soporte financiero). NUNCA
+# deben commitearse bajo ninguna razón, sin excepción, aunque en el futuro se
+# agregue un remoto o se abra el repo a más colaboradores.
+especificaciones_técnicas/
+evaluacion_financiera/
+informe_final/
+soporte_financiero/
+entregables/
+_work_presentation/
+
+# Checkpoints / respaldos locales
+checkpoints/
+*.bundle
+
+# Logs de despliegue/tareas locales (pueden incluir salida verbosa de gcloud)
+tasks/
+
+# Salidas de evaluación regenerables y subconjuntos de prueba rápida (no son el
+# golden dataset "oficial" ni datos de referencia — se regeneran corriendo
+# evaluation/run_all.py o evaluation/build_eval_sample.py):
+evaluation/results*.json
+evaluation/**/*smoke*
+evaluation/*_sample45.jsonl
+
+# Otros archivos
+/Sesión 7.txt
+/CLAUDE.md

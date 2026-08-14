@@ -1,0 +1,45 @@
+# Ignore específico para el build del Admin UI (Dockerfile.admin).
+# A diferencia del .gcloudignore del agente, ESTE conserva admin_ui/ porque
+# el contenedor del admin sí lo necesita (COPY admin_ui ./admin_ui).
+# Dockerfile.admin solo copia: requirements.lock, app/, ingestion/, admin_ui/.
+.git
+.venv
+venv
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+# Corpus y especificaciones: NO van en la imagen (el corpus se ingesta desde GCS).
+# OJO: deben coincidir con el nombre REAL de las carpetas (minúsculas/underscore);
+# los nombres antiguos ("Corpus Documental/") no coincidían y subían ~1.2 GiB de
+# contexto inútil, haciendo que el build muriera por ReadTimeout al subir el tar.
+corpus_documental/
+especificaciones_técnicas/
+.deepeval/
+# App de escritorio (Electron) y clientes que no forman parte de esta imagen.
+desktop/
+android-sst-monitor/
+web-sst-monitor/
+web/
+otros-proyectos/
+# Material del capstone (informes, evaluación financiera): no es código de la app.
+# datasets/, entregables/ y _work_presentation/ faltaban aquí aunque el
+# .gcloudignore de la raíz ya excluía las dos primeras: el tar del Admin subía a
+# 115.7 MiB de material que Dockerfile.admin ni siquiera copia, y esa escritura
+# larga hacía que gcloud muriera en Windows con PermissionError (WinError 32)
+# sobre su propio file.tgz temporal.
+informe_final/
+soporte_financiero/
+evaluacion_financiera/
+datasets/
+entregables/
+_work_presentation/
+# Evaluación, tests, scripts sueltos y notas: no van en el contenedor.
+evaluation/
+tests/
+scripts/
+*.md

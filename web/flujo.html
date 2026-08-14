@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flujo de trabajo — SITFEN · Chatbot Agéntico del Arándano Peruano</title>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f6f5fc; --panel:#ffffff; --panel2:#fbfaff;
+    --ink:#241a3f; --muted:#6b6390; --line:#cdc5e6; --line-soft:#ded8ef;
+    --blue:#3a64ff; --grape:#7c5cff; --berry:#9b4dff; --aru:#b06bff;
+    --green:#16b67e; --amber:#e89a16; --red:#e8557a;
+    --shadow:0 16px 40px rgba(60,40,120,.14);
+    --glow:0 0 0 4px rgba(155,77,255,.18), 0 14px 34px rgba(124,92,255,.30);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(900px 520px at 88% -8%,rgba(155,77,255,.07) 0%,transparent 60%),
+      radial-gradient(760px 480px at -6% 12%,rgba(58,100,255,.07) 0%,transparent 55%),
+      var(--bg);
+    color:var(--ink); min-height:100vh; line-height:1.5;
+  }
+  header{padding:24px 34px 10px; display:flex; align-items:center; gap:18px; flex-wrap:wrap}
+  .logo{
+    width:54px;height:54px;border-radius:18px;flex:none;
+    background:linear-gradient(135deg,var(--berry),var(--blue));
+    display:grid;place-items:center;font-size:29px;box-shadow:var(--shadow);
+  }
+  header h1{margin:0;font-size:21px;letter-spacing:.2px;color:var(--ink)}
+  header p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+  .pill{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .pill span{font-size:11.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:#fff}
+
+  .wrap{padding:4px 34px 30px;margin:0 auto}
+  .controls{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--line);border-radius:16px;
+    padding:12px 16px;margin:8px 0 6px;box-shadow:0 6px 18px rgba(60,40,120,.06)
+  }
+  .btn{border:none;border-radius:11px;padding:10px 18px;font-size:14px;font-weight:650;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--berry),var(--blue));box-shadow:0 8px 20px rgba(124,92,255,.30);transition:.15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ghost{background:#fff;color:var(--berry);border:1px solid var(--line);box-shadow:none}
+  .status{font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:9px;min-height:20px}
+  .status b{color:var(--ink)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--berry);animation:beat 1.1s infinite}
+  @keyframes beat{0%{box-shadow:0 0 0 0 rgba(155,77,255,.45)}70%{box-shadow:0 0 0 9px rgba(155,77,255,0)}100%{box-shadow:0 0 0 0 rgba(155,77,255,0)}}
+  .bar{flex:1 1 160px;height:7px;border-radius:99px;background:#eee7fb;overflow:hidden;min-width:120px}
+  .bar > i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--berry));transition:width .5s ease}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 4px;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:7px;vertical-align:-1px}
+  .hint{color:var(--muted);font-size:12.5px;margin:6px 0 6px}
+
+  /* ---- Horizontal flow ---- */
+  .flow{
+    display:flex;align-items:stretch;gap:6px;overflow-x:auto;overflow-y:hidden;
+    padding:10px 4px 22px;scroll-behavior:smooth
+  }
+  .flow::-webkit-scrollbar{height:11px}
+  .flow::-webkit-scrollbar-thumb{background:#d9d0f3;border-radius:99px}
+  .flow::-webkit-scrollbar-track{background:#f2eefb;border-radius:99px}
+
+  /* Color vivo por sección: cada etapa lleva su propio acento (--c) */
+  .stage[data-lane="row-channels"]{--c:#2f6bff;--c2:#5b8cff}
+  .stage[data-lane="row-reception"]{--c:#0fb9d6;--c2:#37d7ef}
+  .stage[data-lane="row-guards"]{--c:#f59e0b;--c2:#ffba2e}
+  .stage[data-lane="row-orch"]{--c:#7c5cff;--c2:#9b7bff}
+  .stage[data-lane="row-rag"]{--c:#b026ff;--c2:#c860ff}
+  .stage[data-lane="row-output"]{--c:#10b981;--c2:#2fd89b}
+
+  .stage{
+    flex:0 0 auto;display:flex;flex-direction:column;min-width:248px;
+    border:1.5px solid var(--line);border-top:5px solid var(--c,var(--line));
+    border-radius:18px;padding:14px 14px 16px;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c) 10%,#fff),#fff);transition:.2s
+  }
+  .stage.lane-active{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent),var(--shadow)}
+  .stage-head{
+    font-size:12px;text-transform:uppercase;letter-spacing:1.1px;color:#fff;
+    margin-bottom:13px;display:flex;align-items:center;gap:9px;font-weight:750;
+    background:linear-gradient(135deg,var(--c),var(--c2));padding:9px 11px;border-radius:11px;
+    box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent);transition:.2s
+  }
+  .stage.lane-active .stage-head{filter:brightness(1.07) saturate(1.12)}
+  .stage-head .num{
+    width:22px;height:22px;border-radius:7px;display:grid;place-items:center;flex:none;
+    background:rgba(255,255,255,.28);color:#fff;font-size:12px;font-weight:800
+  }
+  .stage.lane-active .stage-head .num{background:#fff;color:var(--c)}
+  .col{display:flex;flex-direction:column;gap:10px}
+
+  .node{
+    position:relative;background:linear-gradient(180deg,#fff,var(--panel2));
+    border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;width:220px;
+    cursor:pointer;transition:.2s;box-shadow:0 5px 14px rgba(60,40,120,.06)
+  }
+  .node:hover{transform:translateY(-3px);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 20%,transparent),var(--shadow);border-color:var(--c)}
+  .node .k{font-size:10.5px;color:var(--c,var(--muted));letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+  .node .t{font-size:14.5px;font-weight:650;margin:4px 0 3px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+  .node .d{font-size:12px;color:var(--muted)}
+  .node .ic{font-size:17px}
+  /* Acento izquierdo con el color vivo de la sección */
+  .node{border-left-width:5px;border-left-color:var(--c,var(--grape))}
+  .node.active,.chip.active{border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 24%,transparent),0 14px 34px color-mix(in srgb,var(--c) 42%,transparent);transform:translateY(-3px) scale(1.02);background:color-mix(in srgb,var(--c) 9%,#fff)}
+  .node.done{border-color:#cfeede}
+  .node.done::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--green);font-weight:800;font-size:12px}
+
+  .varrow{display:flex;justify-content:center;color:#cdc2ee;font-size:15px;line-height:1;transition:.2s}
+  .varrow.lit{color:var(--berry)}
+  .harrow{flex:0 0 auto;display:flex;align-items:center;color:#c9bdf0;font-size:26px;padding:0 2px;transition:.2s}
+  .harrow.lit{color:var(--berry);text-shadow:0 0 10px rgba(155,77,255,.5)}
+
+  .chip{font-size:12px;padding:11px 13px;border-radius:12px;border:1.5px dashed var(--c,var(--line));border-left-width:5px;background:color-mix(in srgb,var(--c) 6%,#fff);cursor:pointer;transition:.18s;color:var(--ink);width:220px}
+  .chip:hover{border-color:var(--c,var(--amber));box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent)}
+  .chip b{color:var(--c,var(--amber))}
+
+  .loopbox{border:1px dashed #c9bcf6;border-radius:16px;padding:12px;margin-top:12px;background:rgba(124,92,255,.045)}
+  .loopbox .lh{font-size:11.5px;color:var(--berry);text-transform:uppercase;letter-spacing:.6px;margin-bottom:11px;text-align:center}
+
+  /* Tooltip: breve descripción de la tarea al pasar/enfocar un elemento */
+  #tip{
+    position:fixed;z-index:90;max-width:264px;pointer-events:none;
+    background:linear-gradient(135deg,#2a1c54,#3a2570);color:#fff;
+    font-size:12.5px;line-height:1.45;padding:9px 12px;border-radius:11px;
+    box-shadow:0 14px 32px rgba(40,25,80,.36);
+    transform:translate(-50%,-100%) translateY(-11px);opacity:0;transition:opacity .14s;left:0;top:0
+  }
+  #tip.show{opacity:1}
+  #tip .tk{display:block;font-size:12.5px;color:#dcc9ff;font-weight:800;margin-bottom:4px}
+  #tip{font-weight:500}
+  #tip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:7px solid transparent;border-top-color:#3a2570}
+  #tip.below{transform:translate(-50%,0) translateY(11px)}
+  #tip.below::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#2a1c54}
+
+  #token{
+    position:fixed;z-index:60;width:38px;height:38px;border-radius:50%;
+    display:grid;place-items:center;font-size:19px;pointer-events:none;opacity:0;left:0;top:0;
+    background:radial-gradient(circle at 35% 30%,#c79bff,#7c5cff);
+    box-shadow:0 8px 22px rgba(124,92,255,.55),0 0 0 6px rgba(124,92,255,.18);
+    transition:opacity .3s;transform:translate(-50%,-50%)
+  }
+
+  .drawer{position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#fff;border-left:1px solid var(--line);box-shadow:-20px 0 60px rgba(60,40,120,.18);transform:translateX(105%);transition:.32s cubic-bezier(.2,.7,.2,1);z-index:80;padding:26px;overflow-y:auto}
+  .drawer.open{transform:none}
+  .drawer h2{margin:6px 0 2px;font-size:20px;color:var(--ink)}
+  .drawer .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .drawer .x{position:absolute;top:18px;right:18px;border:1px solid var(--line);background:#fff;color:var(--ink);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:16px}
+  .drawer .x:hover{border-color:var(--red);color:var(--red)}
+  .drawer .block{margin-bottom:18px}
+  .drawer .block h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--berry);margin:0 0 8px}
+  .drawer ul{margin:0;padding-left:18px}
+  .drawer li{font-size:13.5px;margin-bottom:6px;color:#3c3460}
+  .drawer code{background:#f1ecff;padding:2px 7px;border-radius:6px;font-size:12px;color:#6a45c8}
+  .tag{display:inline-block;font-size:11px;padding:4px 9px;border-radius:8px;background:#f1ecff;color:#6a45c8;margin:0 6px 6px 0}
+  .scrim{position:fixed;inset:0;background:rgba(40,25,80,.28);opacity:0;pointer-events:none;transition:.3s;z-index:70}
+  .scrim.show{opacity:1;pointer-events:auto}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🍇</div>
+  <div>
+    <h1>SITFEN · Flujo de trabajo del asistente</h1>
+    <p>Chatbot agéntico RAG para la inteligencia comercial del arándano peruano</p>
+  </div>
+  <div class="pill">
+    <span>FastAPI · Cloud Run</span>
+    <span>LangGraph ReAct</span>
+    <span>Gemini · Vertex AI</span>
+    <span>Firestore Vector</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <button class="btn" id="play">▶ Reproducir flujo</button>
+    <button class="btn ghost" id="replay">↻ Reiniciar</button>
+    <div class="status" id="status"><span class="dot" style="visibility:hidden"></span><span id="status-txt">Listo. Pulsa «Reproducir» para ver el recorrido de un mensaje.</span></div>
+    <div class="bar"><i id="prog"></i></div>
+  </div>
+
+  <div class="legend">
+    <div><i style="background:#2f6bff"></i>Canales de entrada</div>
+    <div><i style="background:#0fb9d6"></i>Recepción / transcripción</div>
+    <div><i style="background:#f59e0b"></i>Seguridad / Guardrails</div>
+    <div><i style="background:#7c5cff"></i>Orquestador agéntico</div>
+    <div><i style="background:#b026ff"></i>RAG avanzado</div>
+    <div><i style="background:#10b981"></i>Respuesta / salida</div>
+  </div>
+  <p class="hint">▸ Flujo horizontal — desliza para ver todas las etapas. Haz clic en cualquier componente para ver su detalle técnico.</p>
+
+  <div class="flow" id="flow">
+    <div class="stage" data-lane="row-channels">
+      <div class="stage-head"><span class="num">1</span> Canales de entrada</div>
+      <div class="col" id="row-channels"></div>
+    </div>
+    <div class="harrow" data-gap="g1">→</div>
+
+    <div class="stage" data-lane="row-reception">
+      <div class="stage-head"><span class="num">2</span> Recepción</div>
+      <div class="col" id="row-reception"></div>
+    </div>
+    <div class="harrow" data-gap="g2">→</div>
+
+    <div class="stage" data-lane="row-guards">
+      <div class="stage-head"><span class="num">3</span> Seguridad (entrada)</div>
+      <div class="col" id="row-guards"></div>
+    </div>
+    <div class="harrow" data-gap="g3">→</div>
+
+    <div class="stage" data-lane="row-orch">
+      <div class="stage-head"><span class="num">4</span> Orquestador agéntico</div>
+      <div class="col" id="row-orch"></div>
+      <div class="loopbox">
+        <div class="lh">⟳ Razona → Actúa → Observa (límite 8)</div>
+        <div class="col" id="row-tools"></div>
+      </div>
+    </div>
+    <div class="harrow" data-gap="g4">→</div>
+
+    <div class="stage" data-lane="row-rag">
+      <div class="stage-head"><span class="num">5</span> RAG avanzado</div>
+      <div class="col" id="row-rag"></div>
+    </div>
+    <div class="harrow" data-gap="g5">→</div>
+
+    <div class="stage" data-lane="row-output">
+      <div class="stage-head"><span class="num">6</span> Salida y entrega</div>
+      <div class="col" id="row-output"></div>
+    </div>
+  </div>
+</div>
+
+<div id="token">🍇</div>
+<div id="tip"></div>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <button class="x" onclick="closeDrawer()">✕</button>
+  <div id="drawer-body"></div>
+</aside>
+
+<footer>Smart Agentic Chatbot v2 — SITFEN · Desarrollado por el Ing. Julio Salgado</footer>
+
+<script>
+const NODES = {
+  wa:{lane:"row-channels",accent:"blue",ic:"💬",k:"Canal",t:"WhatsApp (Twilio)",d:"Texto o nota de voz.",step:"Llega una consulta por WhatsApp",
+    detail:{sub:"Webhook entrante de Twilio → Cloud Run",
+      sec:[["Qué hace",["Recibe mensajes de texto y notas de voz (OGG/Opus 48 kHz).","Patrón asíncrono: responde un ACK inmediato (TwiML vacío) para no exceder el timeout del webhook (~10-15 s).","El procesamiento real corre en segundo plano y responde por la API REST de Twilio."]],
+        ["Seguridad",["Valida la firma <code>X-Twilio-Signature</code> reconstruyendo la URL pública con <code>X-Forwarded-Proto</code> (anti-spoofing)."]]],
+      tags:["main.py","twilio_whatsapp.py","BackgroundTasks"]}},
+  web:{lane:"row-channels",accent:"blue",ic:"🧑‍💼",k:"Canal",t:"Web / Avatar 3D",d:"TalkingHead + voz (Electron/web).",step:"…o por el avatar web/escritorio",
+    detail:{sub:"Avatar 3D (three.js / TalkingHead) — web y Electron",
+      sec:[["Endpoints",["<code>POST /api/chat</code> — conversación de texto.","<code>POST /api/stt</code> — micrófono (webm/ogg Opus) → texto.","<code>POST /api/tts</code> — síntesis con marcas para lipsync del avatar.","<code>POST /api/voice</code> — MP3 plano de respaldo si el avatar no carga."]],
+        ["Notas",["Usa el MISMO orquestador agéntico que WhatsApp.","Assets de three.js/avatar horneados en la imagen (sin CDN)."]]],
+      tags:["web/","desktop (Electron)","CORS"]}},
+
+  stt:{lane:"row-reception",accent:"blue",ic:"🎙️",k:"Si es voz",t:"Transcripción (STT)",d:"Google Speech-to-Text.",step:"Si es voz: se transcribe a texto",
+    detail:{sub:"Speech-to-Text (Google) — solo si la entrada es audio",
+      sec:[["Qué hace",["Descarga el media de Twilio (auth básica) o recibe bytes del navegador.","Transcribe OGG/Opus 48 kHz con <code>model=default</code> + <code>sample_rate=48000</code> para es-PE.","Marca la conversación como 'voz' para responder también con audio."]]],
+      tags:["voice/stt.py","es-PE","48 kHz"]}},
+  parse:{lane:"row-reception",accent:"blue",ic:"📥",k:"Normaliza",t:"Parse & user_id",d:"Remitente, cuerpo y media.",step:"Se normaliza el mensaje y se identifica al usuario",
+    detail:{sub:"Normalización del mensaje entrante",
+      sec:[["Qué hace",["Construye <code>IncomingMessage</code> (from, body, media).","Deriva un <code>user_id</code> estable (número o <code>web:session</code>) para memoria y rate-limit.","Detecta si es nota de voz por el content-type del media."]]],
+      tags:["parse_incoming()","user_id"]}},
+
+  rate:{lane:"row-guards",accent:"amber",chip:true,label:"⏱️ <b>Rate limiting</b> por usuario",step:"Control anti-abuso por usuario",
+    detail:{sub:"Anti-abuso / anti-DoS",
+      sec:[["Qué hace",["Ventana deslizante por minuto respaldada en Firestore (transacción).","Si excede el límite, responde con aviso y bloquea.","Degrada a 'permitir' si Firestore no está disponible (no tumba el servicio)."]]],
+      tags:["guardrails.py","RateLimiter","Firestore txn"]}},
+  inj:{lane:"row-guards",accent:"amber",chip:true,label:"🛡️ <b>Anti prompt-injection</b> + longitud",step:"Se filtra inyección de prompts y longitud",
+    detail:{sub:"Validación de entrada",
+      sec:[["Qué hace",["Detecta patrones de jailbreak/inyección en ES/EN (ignorar instrucciones, 'system prompt', developer mode…).","Recorta a <code>max_input_chars</code>.","Si detecta inyección, bloquea y redirige al dominio del arándano."]]],
+      tags:["check_input()","regex ES/EN"]}},
+  pii:{lane:"row-guards",accent:"amber",chip:true,label:"🔒 <b>Redacción PII</b> en logs/memoria",step:"Se redacta PII antes de loguear/guardar",
+    detail:{sub:"Minimización de datos (Ley 29733 / GDPR)",
+      sec:[["Qué hace",["Reemplaza email, teléfono, DNI, RUC y tarjetas por etiquetas antes de loguear o persistir.","Aplica a las trazas de observabilidad y a la memoria conversacional."]]],
+      tags:["redact_pii()","DNI/RUC/email"]}},
+
+  mem:{lane:"row-orch",accent:"grape",ic:"🧠",k:"Contexto",t:"Memoria conversacional",d:"Historial en Firestore.",step:"Se carga el historial de la conversación",
+    detail:{sub:"Continuidad de la conversación",
+      sec:[["Qué hace",["Carga el historial del usuario desde Firestore y lo añade al prompt de sistema.","Sin estado en memoria del proceso → seguro para concurrencia.","Tras responder, persiste el nuevo turno (entrada saneada + respuesta)."]]],
+      tags:["memory.py","Firestore","stateless"]}},
+  agent:{lane:"row-orch",accent:"grape",ic:"🤖",k:"Decide",t:"Agente ReAct (Gemini)",d:"Razona y elige herramientas.",step:"El agente razona y decide qué herramientas usar",
+    detail:{sub:"create_react_agent (LangGraph) + Gemini en Vertex AI",
+      sec:[["Qué hace",["Recibe el system prompt (skill) + historial + consulta del usuario.","Razona y decide qué tool(s) invocar; itera hasta resolver (límite de 8 pasos).","Vertex Safety Settings = primera capa de guardrails (odio, peligro, acoso, explícito)."]],
+        ["Modelos",["Gemini rápido (temp 0.2) para orquestación; Gemini pro para razonamiento complejo.","Embeddings multilingües para el RAG."]]],
+      tags:["orchestrator.py","LangGraph","Vertex AI"]}},
+
+  t1:{lane:"row-tools",accent:"berry",ic:"📚",k:"Tool",t:"Base de conocimiento",d:"Consulta general del corpus.",step:"Invoca tool: base de conocimiento",
+    detail:{sub:"consultar_base_conocimiento",sec:[["Uso",["Pregunta general sobre cultivo, exportación, mercados, sanidad o comercio del arándano."]]],tags:["rag_tools.py"]}},
+  t2:{lane:"row-tools",accent:"berry",ic:"📋",k:"Tool",t:"Requisitos de exportación",d:"Certificaciones y protocolos.",step:"Invoca tool: requisitos de exportación",
+    detail:{sub:"consultar_requisitos_exportacion",sec:[["Uso",["Documentación, certificaciones y protocolos fitosanitarios (p. ej. con China).","Enriquece la consulta con hints de dominio para mejorar el recall."]]],tags:["domain_hint"]}},
+  t3:{lane:"row-tools",accent:"berry",ic:"💲",k:"Tool",t:"Tarifas y costos",d:"Costos logísticos / certificación.",step:"Invoca tool: tarifas y costos",
+    detail:{sub:"consultar_tarifas_y_costos",sec:[["Uso",["Tarifarios, costos de campaña, logística y certificación."]]],tags:["domain_hint"]}},
+  t4:{lane:"row-tools",accent:"berry",ic:"📈",k:"Tool",t:"Inteligencia comercial",d:"Demanda, destinos, tendencias.",step:"Invoca tool: inteligencia comercial",
+    detail:{sub:"consultar_inteligencia_comercial",sec:[["Uso",["Mercado, demanda, países destino, competitividad y tendencias."]]],tags:["domain_hint"]}},
+  t5:{lane:"row-tools",accent:"berry",ic:"📝",k:"Tool",t:"Resumir contenido",d:"Síntesis ejecutiva en viñetas.",step:"Invoca tool: resumir contenido",
+    detail:{sub:"resumir_contenido",sec:[["Uso",["Recupera con multi-query y sintetiza los fragmentos más relevantes en viñetas."]]],tags:["multiquery"]}},
+
+  r1:{lane:"row-rag",accent:"berry",ic:"🔀",k:"Paso 1",t:"Multi-query",d:"Expande la consulta (Gemini).",step:"RAG · Expande la consulta (multi-query)",
+    detail:{sub:"Expansión / reescritura de consulta",sec:[["Qué hace",["Gemini genera 2 reformulaciones diversas además de la original para subir el recall."]]],tags:["retriever.py","_expand_query"]}},
+  r2:{lane:"row-rag",accent:"berry",ic:"🧭",k:"Paso 2",t:"Búsqueda vectorial KNN",d:"Firestore Vector por sub-consulta.",step:"RAG · Búsqueda vectorial KNN en Firestore",
+    detail:{sub:"Búsqueda KNN nativa en Firestore",sec:[["Qué hace",["Embebe cada sub-consulta y hace KNN en Firestore Vector Store.","Recupera <code>top_k</code> candidatos por consulta."]]],tags:["FirestoreVectorStore","embeddings"]}},
+  r3:{lane:"row-rag",accent:"berry",ic:"🧹",k:"Paso 3",t:"Deduplicación",d:"Une candidatos por doc_id.",step:"RAG · Deduplica candidatos",
+    detail:{sub:"Fusión de candidatos",sec:[["Qué hace",["Deduplica por <code>doc_id</code> y ordena por distancia vectorial."]]],tags:["dedup"]}},
+  r4:{lane:"row-rag",accent:"berry",ic:"🎯",k:"Paso 4",t:"Reranking (Gemini)",d:"Cross-encoder ligero vía LLM.",step:"RAG · Reordena por relevancia (rerank)",
+    detail:{sub:"Reordenamiento por relevancia",sec:[["Qué hace",["Gemini (temp 0) ordena los fragmentos del más al menos relevante.","Se queda con <code>rerank_top_n</code>; completa si el LLM omite índices."]]],tags:["_rerank","rerank_top_n"]}},
+  r5:{lane:"row-rag",accent:"berry",ic:"📎",k:"Paso 5",t:"Contexto con citas",d:"Bloque numerado + fuentes.",step:"RAG · Arma contexto con citas (grounding)",
+    detail:{sub:"Grounding con citaciones",sec:[["Qué hace",["Arma un contexto numerado <code>[i] (Fuente: …)</code> que el agente usa para responder con grounding.","Devuelve también la lista de fuentes para mostrar al usuario."]]],tags:["RetrievalResult","fuentes"]}},
+
+  out1:{lane:"row-output",accent:"green",ic:"🚧",k:"Salida",t:"Guardrail de salida",d:"Evita fuga de prompts.",step:"Guardrail de salida sobre la respuesta",
+    detail:{sub:"check_output()",sec:[["Qué hace",["Filtra/registra si la respuesta intenta filtrar el prompt de sistema o instrucciones internas."]]],tags:["guardrails.py"]}},
+  out2:{lane:"row-output",accent:"green",ic:"🔊",k:"Si fue voz",t:"Síntesis de voz (TTS)",d:"Audio firmado de respuesta.",step:"Si fue voz: se sintetiza el audio (TTS)",
+    detail:{sub:"Text-to-Speech (Google)",sec:[["Qué hace",["Si la entrada fue voz y no se bloqueó, genera audio y lo entrega como media.","La firma de autoría no se lee en voz alta."]]],tags:["voice/tts.py"]}},
+  out3:{lane:"row-output",accent:"green",ic:"📤",k:"Entrega",t:"Respuesta + persistencia",d:"Envía y guarda el turno.",step:"Se entrega la respuesta y se guarda el turno",
+    detail:{sub:"Entrega final",sec:[["Qué hace",["WhatsApp: envío por API REST de Twilio (texto y, si aplica, audio).","Web/Avatar: JSON <code>{reply, footer}</code> + lipsync.","Persiste el turno en memoria y registra traza en LangSmith.","Firma: «Desarrollado por el Ing. Julio Salgado»."]]],tags:["send_whatsapp_message","LangSmith"]}},
+};
+
+const VARROW='<div class="varrow">▼</div>';
+function nodeHTML(id,n){
+  if(n.chip) return `<div class="chip" id="n-${id}" tabindex="0" role="button" onclick="openDrawer('${id}')">${n.label}</div>`;
+  return `<div class="node accent-${n.accent}" id="n-${id}" tabindex="0" role="button" onclick="openDrawer('${id}')">
+      <div class="k">${n.k}</div>
+      <div class="t"><span class="ic">${n.ic}</span>${n.t}</div>
+      <div class="d">${n.d}</div></div>`;
+}
+const ORDER={
+  "row-channels":["wa","web"],
+  "row-reception":["stt","parse"],
+  "row-guards":["rate","inj","pii"],
+  "row-orch":["mem","agent"],
+  "row-tools":["t1","t2","t3","t4","t5"],
+  "row-rag":["r1","r2","r3","r4","r5"],
+  "row-output":["out1","out2","out3"],
+};
+// dentro de estas columnas, los pasos son secuenciales → conector ▼
+const SEQCOL=new Set(["row-reception","row-orch","row-rag","row-output"]);
+for(const [row,ids] of Object.entries(ORDER)){
+  document.getElementById(row).innerHTML =
+    ids.map((id,i)=>((SEQCOL_has(row)&&i>0)?VARROW:"")+nodeHTML(id,NODES[id])).join("");
+}
+function SEQCOL_has(r){return SEQCOL.has(r);}
+
+// ---------- Tooltip: descripción de la tarea al pasar/enfocar un elemento ----------
+const tip=document.getElementById('tip');
+const flowEl=document.getElementById('flow');
+function showTip(el){
+  const n=NODES[el.id.replace('n-','')];
+  if(!n){return;}
+  // Título del elemento + breve descripción de la función que realiza.
+  const title=(n.t||(n.label||'').replace(/<[^>]+>/g,'')).trim();
+  const fn=(n.detail&&n.detail.sub)||n.d||n.step||'';
+  tip.innerHTML=`<span class="tk">${(n.ic?n.ic+' ':'')}${title}</span>${fn}`;
+  const r=el.getBoundingClientRect();
+  let top=r.top-11, below=false;
+  if(top<74){top=r.bottom+11;below=true;}        // si no cabe arriba, va debajo
+  tip.style.left=(r.left+r.width/2)+'px';
+  tip.style.top=top+'px';
+  tip.classList.toggle('below',below);
+  tip.classList.add('show');
+}
+function hideTip(){tip.classList.remove('show');}
+['mouseover','focusin'].forEach(ev=>flowEl.addEventListener(ev,e=>{
+  const el=e.target.closest('.node,.chip'); if(el) showTip(el);
+}));
+['mouseout','focusout'].forEach(ev=>flowEl.addEventListener(ev,e=>{
+  const el=e.target.closest('.node,.chip');
+  if(el && !el.contains(e.relatedTarget)) hideTip();
+}));
+flowEl.addEventListener('scroll',hideTip,{passive:true});
+// Enter/Espacio abren el detalle cuando el foco está sobre un elemento.
+flowEl.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const el=e.target.closest('.node,.chip'); if(!el)return;
+  e.preventDefault(); openDrawer(el.id.replace('n-',''));
+});
+
+// ---------- Drawer ----------
+function openDrawer(id){
+  const n=NODES[id],d=n.detail;
+  const secs=d.sec.map(([h,items])=>`<div class="block"><h3>${h}</h3><ul>${items.map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("");
+  const tags=(d.tags||[]).map(t=>`<span class="tag">${t}</span>`).join("");
+  const title=n.t||(n.label||"").replace(/<[^>]+>/g,"");
+  document.getElementById('drawer-body').innerHTML=
+    `<h2>${n.ic||"●"} ${title}</h2><div class="sub">${d.sub}</div>${secs}<div class="block"><h3>Implementación</h3>${tags}</div>`;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('scrim').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('scrim').classList.remove('show');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+
+// ---------- Animación (horizontal) ----------
+const SEQ=[
+  {id:"wa",gap:null},
+  {id:"stt",gap:"g1"},{id:"parse",gap:null},
+  {id:"rate",gap:"g2"},{id:"inj",gap:null},{id:"pii",gap:null},
+  {id:"mem",gap:"g3"},{id:"agent",gap:null},
+  {id:"t4",gap:null},
+  {id:"r1",gap:"g4"},{id:"r2",gap:null},{id:"r3",gap:null},{id:"r4",gap:null},{id:"r5",gap:null},
+  {id:"agent",gap:null,note:"El agente integra el contexto recuperado y redacta la respuesta"},
+  {id:"out1",gap:"g5"},{id:"out2",gap:null},{id:"out3",gap:null},
+];
+const flow=document.getElementById('flow');
+const token=document.getElementById('token');
+const statusTxt=document.getElementById('status-txt');
+const dot=document.querySelector('.status .dot');
+const prog=document.getElementById('prog');
+let timers=[],playing=false,STEP=950;
+let activeEl=null,cur={x:innerWidth/2,y:innerHeight/2},rafId=null;
+
+function follow(){
+  if(activeEl){
+    const r=activeEl.getBoundingClientRect();
+    const tx=r.left+r.width/2, ty=r.top+r.height/2;
+    cur.x+=(tx-cur.x)*0.2; cur.y+=(ty-cur.y)*0.2;
+    token.style.left=cur.x+'px'; token.style.top=cur.y+'px';
+  }
+  rafId=requestAnimationFrame(follow);
+}
+function clearTimers(){timers.forEach(t=>clearTimeout(t));timers=[];}
+function resetVisuals(){
+  document.querySelectorAll('.node,.chip').forEach(el=>el.classList.remove('active','done'));
+  document.querySelectorAll('.stage').forEach(el=>el.classList.remove('lane-active'));
+  document.querySelectorAll('.harrow,.varrow').forEach(el=>el.classList.remove('lit'));
+  token.style.opacity=0;prog.style.width='0%';activeEl=null;
+  statusTxt.textContent='Listo. Pulsa «Reproducir» para ver el recorrido de un mensaje.';
+  dot.style.visibility='hidden';
+}
+function litGap(gapId){
+  if(!gapId)return;
+  const g=document.querySelector(`.harrow[data-gap="${gapId}"]`);
+  if(g){g.classList.add('lit');setTimeout(()=>g.classList.remove('lit'),STEP);}
+}
+function play(){
+  if(playing)return;
+  resetVisuals();playing=true;dot.style.visibility='visible';
+  document.getElementById('play').textContent='⏸ Pausar';
+  if(!rafId) follow();
+  SEQ.forEach((s,i)=>{
+    timers.push(setTimeout(()=>{
+      const n=NODES[s.id], el=document.getElementById('n-'+s.id);
+      document.querySelectorAll('.stage').forEach(L=>L.classList.toggle('lane-active',L.dataset.lane===n.lane));
+      document.querySelectorAll('.node.active,.chip.active').forEach(a=>{a.classList.remove('active');a.classList.add('done');});
+      litGap(s.gap);
+      el.classList.remove('done');el.classList.add('active');
+      activeEl=el;
+      if(i===0){const r=el.getBoundingClientRect();cur.x=r.left+r.width/2;cur.y=r.top+r.height/2;token.style.opacity=1;}
+      el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+      const prevV=el.previousElementSibling;
+      if(prevV&&prevV.classList.contains('varrow')){prevV.classList.add('lit');setTimeout(()=>prevV.classList.remove('lit'),STEP);}
+      statusTxt.innerHTML=`<b>Paso ${i+1}/${SEQ.length}:</b> ${s.note||n.step}`;
+      prog.style.width=((i+1)/SEQ.length*100)+'%';
+      if(i===SEQ.length-1){
+        timers.push(setTimeout(()=>{
+          el.classList.remove('active');el.classList.add('done');
+          token.style.opacity=0;dot.style.visibility='hidden';playing=false;
+          document.getElementById('play').textContent='▶ Reproducir flujo';
+          statusTxt.innerHTML='✅ <b>Respuesta entregada.</b> El asistente está listo para la siguiente consulta.';
+          document.querySelectorAll('.stage').forEach(L=>L.classList.remove('lane-active'));
+        },STEP));
+      }
+    },i*STEP));
+  });
+}
+function stop(){clearTimers();playing=false;document.getElementById('play').textContent='▶ Reproducir flujo';}
+document.getElementById('play').onclick=()=>{playing?stop():play();};
+document.getElementById('replay').onclick=()=>{stop();resetVisuals();flow.scrollTo({left:0,behavior:'smooth'});setTimeout(play,180);};
+window.addEventListener('load',()=>setTimeout(play,500));
+</script>
+</body>
+</html>

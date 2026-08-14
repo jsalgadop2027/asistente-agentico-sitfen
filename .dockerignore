@@ -1,0 +1,14 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.env
+.env.*
+Corpus Documental
+Especificaciones Técnicas
+tests
+infra
+*.md
+.deepeval

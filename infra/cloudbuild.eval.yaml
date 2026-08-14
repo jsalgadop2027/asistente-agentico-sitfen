@@ -1,0 +1,19 @@
+# Build de la imagen de evaluación usando Dockerfile.eval (Cloud Build).
+# Requiere que _BASE_IMAGE (la imagen del agente) ya exista — correr
+# infra/03_deploy.ps1 primero si aún no se desplegó el agente.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.eval
+      - --build-arg
+      - BASE_IMAGE=${_BASE_IMAGE}
+      - -t
+      - ${_IMAGE}
+      - .
+images:
+  - ${_IMAGE}
+substitutions:
+  _BASE_IMAGE: "us-central1-docker.pkg.dev/chatbot-agentico-v2/chatbot-repo/arandano-agent:latest"
+  _IMAGE: "us-central1-docker.pkg.dev/chatbot-agentico-v2/chatbot-repo/arandano-eval:latest"

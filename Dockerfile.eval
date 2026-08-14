@@ -1,0 +1,22 @@
+# Imagen del job de evaluación (arandano-eval). Extiende la imagen del agente YA
+# construida (ver Dockerfile) agregando requirements-eval.txt (ragas, deepeval) —
+# deliberadamente fuera de la imagen de producción (menor superficie de ataque),
+# pero necesaria para evaluation/run_all.py, build_golden_dataset.py y
+# derivation_eval.py. Reutiliza el stack base (system deps + requirements.lock +
+# assets del avatar) de la imagen del agente, pero SÍ vuelve a copiar app/,
+# ingestion/ y evaluation/ frescos: la imagen base pudo construirse antes de que
+# existieran módulos nuevos de evaluación (build_golden_dataset.py,
+# derivation_eval.py), y no se le pide al usuario reconstruir el agente completo
+# solo para que el job de evaluación vea código nuevo.
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+COPY requirements-eval.txt .
+COPY requirements.lock .
+RUN sed -E -e 's/\[[^][]*\]//g' -e '/^click==/d' requirements.lock > /tmp/core-constraints.txt \
+    && pip install -r requirements-eval.txt -c /tmp/core-constraints.txt
+COPY app ./app
+COPY ingestion ./ingestion
+COPY evaluation ./evaluation
+USER appuser

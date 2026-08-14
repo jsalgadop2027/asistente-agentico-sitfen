@@ -1,0 +1,50 @@
+# Empaqueta el instalador de escritorio (Electron, Windows/NSIS) en la nube.
+# Usa electronuserland/builder:wine (imagen oficial de electron-builder con
+# Wine) para generar el .exe sin necesitar una máquina Windows -- Cloud Build
+# no ofrece workers Windows en el pool estándar, pero NSIS se puede empaquetar
+# vía Wine sobre Linux (soportado oficialmente por electron-builder).
+# El instalador resultante se sube a GCS: Cloud Build no tiene un concepto de
+# "artefacto descargable" como GitHub Actions.
+steps:
+  - name: electronuserland/builder:wine
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -eux
+        npm ci
+
+        # Assets del avatar (three.js, TalkingHead, modelos .glb -- incluido
+        # avatar_robot.glb). Equivalente en bash a scripts/fetch-assets.ps1:
+        # esta imagen no trae PowerShell, así que se replican los mismos
+        # pasos/versiones (ver ese script si cambian).
+        mkdir -p renderer/vendor/three renderer/vendor/talkinghead
+        curl -fSL "https://registry.npmjs.org/three/-/three-0.170.0.tgz" -o /tmp/three.tgz
+        tar -xzf /tmp/three.tgz -C /tmp
+        cp -r /tmp/package/build renderer/vendor/three/build
+        mkdir -p renderer/vendor/three/examples
+        cp -r /tmp/package/examples/jsm renderer/vendor/three/examples/jsm
+
+        base="https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@1.4/modules"
+        for f in talkinghead.mjs dynamicbones.mjs lipsync-fi.mjs lipsync-en.mjs lipsync-lt.mjs; do
+          curl -fSL "$base/$f" -o "renderer/vendor/talkinghead/$f"
+        done
+
+        curl -fSL "https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@1.4/avatars/brunette.glb" -o renderer/avatar.glb
+        curl -fSL "https://static.poly.pizza/7d95dbce-8c73-489b-8298-f430b1f0dbdf.glb" -o renderer/avatar_robot.glb
+        if [ -n "${_MALE_AVATAR_URL}" ]; then
+          curl -fSL "${_MALE_AVATAR_URL}" -o renderer/avatar_male.glb || echo "AVISO: no se pudo descargar el animador Hombre."
+        else
+          echo "AVISO: _MALE_AVATAR_URL no definido, el animador 'Hombre' no estará disponible."
+        fi
+
+        npx electron-builder --win nsis --publish never
+
+  - name: gcr.io/cloud-builders/gsutil
+    args: ["cp", "dist/*.exe", "gs://${_BUCKET}/desktop/"]
+
+substitutions:
+  _BUCKET: "chatbot-agentico-v2-desktop-builds"
+  _MALE_AVATAR_URL: ""
+
+timeout: 1200s

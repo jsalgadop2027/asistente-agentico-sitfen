@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- La UI real es Compose; este tema solo evita ActionBar y fija el fondo. -->
+    <style name="Theme.SstMonitor" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/ocean_bg</item>
+        <item name="android:statusBarColor">@color/ocean_primary</item>
+    </style>
+</resources>
