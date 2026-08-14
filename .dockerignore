@@ -8,24 +8,12 @@ __pycache__/
 .ruff_cache/
 .env
 .env.*
-# Corpus y especificaciones: NO van en la imagen (se ingesta desde GCS).
-# OJO: deben coincidir con el nombre REAL de las carpetas (minúsculas/guion bajo);
-# los nombres antiguos ("Corpus Documental/") no coincidían y no excluían nada.
-corpus_documental/
-especificaciones_técnicas/
-# Material académico/financiero del capstone: no es código de la app.
-evaluacion_financiera/
-informe_final/
-soporte_financiero/
 datasets/
-entregables/
-_work_presentation/
 .deepeval/
 # Apps cliente y otros proyectos: ningún Dockerfile de este repo los copia.
 desktop/
 android-sst-monitor/
 web-sst-monitor/
-otros-proyectos/
 # Notas, tests, scripts sueltos e infra: no van en ningún contenedor.
 tests/
 infra/
