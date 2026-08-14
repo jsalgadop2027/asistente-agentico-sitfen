@@ -48,20 +48,8 @@ npm-debug.log*
 .gcloudignore
 
 # Corpus fuente y material pesado (no es código; no se modifica en este trabajo)
-corpus_documental/
 desktop/renderer/vendor/
 desktop/renderer/avatar.glb
-
-# Material académico/financiero y entregables — información privada o sensible
-# del autor y del capstone (informes, exposiciones, soporte financiero). NUNCA
-# deben commitearse bajo ninguna razón, sin excepción, aunque en el futuro se
-# agregue un remoto o se abra el repo a más colaboradores.
-especificaciones_técnicas/
-evaluacion_financiera/
-informe_final/
-soporte_financiero/
-entregables/
-_work_presentation/
 
 # Checkpoints / respaldos locales
 checkpoints/
@@ -78,5 +66,4 @@ evaluation/**/*smoke*
 evaluation/*_sample45.jsonl
 
 # Otros archivos
-/Sesión 7.txt
 /CLAUDE.md
